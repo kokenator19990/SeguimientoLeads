@@ -701,8 +701,12 @@ h3 {
 }
 
 .chart-box:not(.collapsed) .chart-inner {
-  max-height: 320px;
-  padding: 1.5rem;
+  max-height: 500px;
+  padding: 1rem 1.5rem 2rem;
+}
+
+.chart-box:not(.collapsed) .chart-inner canvas {
+  min-height: 250px;
 }
 
 .chart-box:not(.collapsed) .expand-hint {
