@@ -2,13 +2,12 @@
 // OPENCORE STATS — GOOGLE SHEETS LIVE (V3.0)
 // ========================================
 
-// ID DOC: 13Up7JXKbF4xrbwGF0Hwh01Vnu_8fFevGgBUE9O7QgQ
-// (Reemplazar la ID a futuro si se hace una copia)
-const SHEET_ID = '2PACX-1vR3QU-L6FxcRuM4okfwd3BS-1xBGJVHFbjlekbbdeeAbxuSG5Yrm7GlxT2PoTYOW58K6mNiZMh3dm7K';
+// Pub key del documento publicado en Google Sheets
+const PUB_KEY = '2PACX-1vR3QU-L6FxcRuM4okfwd3BS-1xBGJVHFbjlekbbdeeAbxuSG5Yrm7GlxT2PotYOW58K6mNiZMh3dm7K';
 const SHEETS_TO_LOAD = [
-    { name: 'CUENTAS_VIP_TOP', gid: '216976702', label: 'VIP Top' },
-    { name: 'INTELIGENCIA_MERCADO', gid: '45399', label: 'Intelig. Mercado' },
-    { name: 'BASE_COMPLETA_LIMPIA', gid: '606958099', label: 'Base Completa' }
+    { name: 'CUENTAS_VIP_TOP', gid: '1329255400', label: 'VIP Top' },
+    { name: 'INTELIGENCIA_MERCADO', gid: '1464700851', label: 'Intelig. Mercado' },
+    { name: 'BASE_COMPLETA_LIMPIA', gid: '107987896', label: 'Base Completa' }
 ];
 
 // --- AUDIO SYSTEM ---
@@ -72,7 +71,7 @@ async function fetchAndProcessData() {
 
         for (let sheetDef of SHEETS_TO_LOAD) {
             // Requerimiento: El google sheets DEBE estar publicado en la web
-            const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${sheetDef.gid}`;
+            const url = `https://docs.google.com/spreadsheets/d/e/${PUB_KEY}/pub?output=csv&gid=${sheetDef.gid}`;
             const response = await fetch(url);
             if (!response.ok) {
                 console.warn(`No se pudo cargar la pestaña ${sheetDef.name}. ¿Está publicado el documento en la web?`);
