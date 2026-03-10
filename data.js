@@ -1,8 +1,8 @@
 const DASHBOARD_DATA = {
   "kpis": {
-    "total_prospectos": 2199,
+    "total_prospectos": 2830,
     "contactadas": 0,
-    "no_contactadas": 2199,
+    "no_contactadas": 2830,
     "reuniones": 0,
     "tasa_conversion": 0,
     "cobertura": 0.0
@@ -14,14 +14,14 @@ const DASHBOARD_DATA = {
       "no_contactadas": 400
     },
     "Intelig. Mercado": {
-      "total": 6,
+      "total": 232,
       "contactadas": 0,
-      "no_contactadas": 6
+      "no_contactadas": 232
     },
     "Base Completa": {
-      "total": 1793,
+      "total": 2198,
       "contactadas": 0,
-      "no_contactadas": 1793
+      "no_contactadas": 2198
     }
   },
   "subestados": {
@@ -36,10 +36,12 @@ const DASHBOARD_DATA = {
     "LinkedIn": 0,
     "Correo": 0,
     "Teléfono": 0,
+    "WhatsApp": 0,
+    "Referido": 0,
     "Contacto Directo": 0
   },
   "pipeline": {
-    "total": 2199,
+    "total": 2830,
     "contactadas": 0,
     "en_seguimiento": 0,
     "reuniones": 0
@@ -47,7 +49,7 @@ const DASHBOARD_DATA = {
   "seguimientos": {},
   "contactadas_detail": [],
   "reuniones_detail": [],
-  "updated": "10/03/2026 18:54",
+  "updated": "10/03/2026 19:06",
   "conversion_canal": {
     "LinkedIn": {
       "contactados": 0,
@@ -60,6 +62,16 @@ const DASHBOARD_DATA = {
       "tasa": 0
     },
     "Teléfono": {
+      "contactados": 0,
+      "reuniones": 0,
+      "tasa": 0
+    },
+    "WhatsApp": {
+      "contactados": 0,
+      "reuniones": 0,
+      "tasa": 0
+    },
+    "Referido": {
       "contactados": 0,
       "reuniones": 0,
       "tasa": 0
