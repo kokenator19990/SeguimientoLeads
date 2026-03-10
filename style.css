@@ -37,14 +37,39 @@ body {
   overflow-x: hidden;
 }
 
-/* NOISE TEXTURE OUTLAY */
+/* NOISE & GRID TEXTURE OVERLAY */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center center;
+  transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+  animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+  0% {
+    transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px);
+  }
+
+  100% {
+    transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px);
+  }
+}
+
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.03;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
@@ -156,6 +181,8 @@ h3 {
 
 /* CONTAINER */
 .container {
+  position: relative;
+  z-index: 10;
   max-width: 1400px;
   margin: 0 auto;
   padding: 3rem 1.5rem;
@@ -505,63 +532,89 @@ h3 {
   color: var(--bg-dark);
 }
 
+@keyframes pulseGlow {
+  0% {
+    opacity: 0.15;
+    transform: scale(0.95);
+  }
+
+  50% {
+    opacity: 0.35;
+    transform: scale(1.05);
+  }
+
+  100% {
+    opacity: 0.15;
+    transform: scale(0.95);
+  }
+}
+
 .elite-glow {
   position: absolute;
-  inset: 0;
-  opacity: 0.08;
+  inset: -50%;
+  border-radius: 50%;
+  opacity: 0.2;
   transition: var(--transition);
   z-index: 1;
+  pointer-events: none;
+  animation: pulseGlow 4s infinite ease-in-out;
 }
 
 .bg-accent-cyan {
   border-top: 2px solid var(--accent-cyan);
+  overflow: hidden;
 }
 
 .bg-accent-cyan .elite-value {
   color: var(--accent-cyan);
-  text-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+  text-shadow: 0 0 30px rgba(0, 229, 255, 0.6);
 }
 
 .bg-accent-cyan .elite-glow {
-  background: radial-gradient(circle at center, var(--accent-cyan) 0%, transparent 70%);
+  background: radial-gradient(circle at center, var(--accent-cyan) 0%, transparent 60%);
 }
 
 .bg-accent-cyan:hover .elite-glow {
-  opacity: 0.2;
+  opacity: 0.45;
+  animation-play-state: paused;
 }
 
 .bg-accent-yellow {
   border-top: 2px solid var(--accent-yellow);
+  overflow: hidden;
 }
 
 .bg-accent-yellow .elite-value {
   color: var(--accent-yellow);
-  text-shadow: 0 0 20px rgba(229, 255, 0, 0.4);
+  text-shadow: 0 0 30px rgba(229, 255, 0, 0.6);
 }
 
 .bg-accent-yellow .elite-glow {
-  background: radial-gradient(circle at center, var(--accent-yellow) 0%, transparent 70%);
+  background: radial-gradient(circle at center, var(--accent-yellow) 0%, transparent 60%);
 }
 
 .bg-accent-yellow:hover .elite-glow {
-  opacity: 0.2;
+  opacity: 0.45;
+  animation-play-state: paused;
 }
 
 .bg-accent-red {
   border-top: 2px solid var(--accent-red);
+  overflow: hidden;
 }
 
 .bg-accent-red .elite-value {
   color: var(--accent-red);
-  text-shadow: 0 0 20px rgba(255, 42, 42, 0.4);
+  text-shadow: 0 0 30px rgba(255, 42, 42, 0.6);
 }
 
 .bg-accent-red .elite-glow {
-  background: radial-gradient(circle at center, var(--accent-red) 0%, transparent 70%);
+  background: radial-gradient(circle at center, var(--accent-red) 0%, transparent 60%);
 }
 
 .bg-accent-red:hover .elite-glow {
-  opacity: 0.2;
+  opacity: 0.45;
+  animation-play-state: paused;
 }
 
 /* CHARTS */
@@ -824,6 +877,14 @@ tr:hover td {
   color: var(--text-dim);
 }
 
+.oc-logo {
+  height: 28px;
+  width: auto;
+  max-width: 200px;
+  display: block;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.2));
+}
+
 /* RESPONSIVE */
 @media (max-width: 1200px) {
   .kpi-grid {
@@ -847,6 +908,14 @@ tr:hover td {
     padding: 1rem;
   }
 
+  .oc-logo {
+    height: 24px;
+  }
+
+  .elite-grid {
+    grid-template-columns: 1fr;
+  }
+
   .container {
     padding: 1.5rem 1rem;
   }
@@ -862,13 +931,13 @@ tr:hover td {
   .kpi-value {
     font-size: 3rem;
   }
-
-  .seg-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 480px) {
+  .oc-logo {
+    height: 20px;
+  }
+
   .kpi-grid {
     grid-template-columns: 1fr;
   }
@@ -885,4 +954,14 @@ tr:hover td {
   .badge {
     display: none;
   }
+
+  .elite-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .elite-value {
+    font-size: 4rem;
+  }
 }
+
+```

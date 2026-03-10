@@ -16,12 +16,32 @@
 
 <body>
 
+  <!-- ANIMATED BACKGROUND -->
+  <div class="particles-bg" id="particles-bg"></div>
+
   <!-- HEADER -->
   <header class="header">
     <div class="header-inner">
       <div class="logo">
-        <div class="logo-mark"></div>
-        <h1>OPENCORE <span>STATS</span></h1>
+        <svg class="oc-logo" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg">
+          <g fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700">
+            <!-- OPEN -->
+            <text x="0" y="70" font-size="60" letter-spacing="4">OPEN</text>
+            <!-- CORE: The O and C -->
+            <g transform="translate(195, 20)">
+              <!-- Big 'O' -->
+              <circle cx="35" cy="30" r="32" fill="none" stroke="#FFFFFF" stroke-width="10" />
+              <!-- Inner 'C' -->
+              <path d="M 45 15 A 16 16 0 1 0 45 45" fill="none" stroke="#FFFFFF" stroke-width="8"
+                stroke-linecap="square" />
+            </g>
+            <!-- RE -->
+            <text x="275" y="70" font-size="60" letter-spacing="4">RE</text>
+            <!-- SOFTWARE -->
+            <text x="3" y="105" font-size="20" font-family="'Inter', sans-serif" font-weight="400" letter-spacing="7"
+              fill="#888888">SOFTWARE</text>
+          </g>
+        </svg>
       </div>
       <div class="header-meta">
         <span class="badge" id="update-date">Cargando datos...</span>
