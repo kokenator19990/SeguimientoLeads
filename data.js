@@ -44,14 +44,10 @@ const DASHBOARD_DATA = {
     "en_seguimiento": 0,
     "reuniones": 0
   },
-  "seguimientos": {
-    "vencidos": 0,
-    "hoy": 0,
-    "pendientes": 0
-  },
+  "seguimientos": {},
   "contactadas_detail": [],
   "reuniones_detail": [],
-  "updated": "10/03/2026 16:52",
+  "updated": "10/03/2026 17:11",
   "conversion_canal": {
     "LinkedIn": {
       "contactados": 0,
@@ -73,5 +69,10 @@ const DASHBOARD_DATA = {
       "reuniones": 0,
       "tasa": 0
     }
+  },
+  "indicadores_elite": {
+    "contactos": 0,
+    "reuniones": 0,
+    "cerrados": 0
   }
 };

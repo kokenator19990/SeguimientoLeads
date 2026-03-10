@@ -64,9 +64,11 @@ document.addEventListener('DOMContentLoaded', () => {
     animateValue('kpi-no-val', 0, D.kpis.no_contactadas, 1500, true);
     animateValue('kpi-reuniones-val', 0, D.kpis.reuniones, 1500, true);
 
-    animateValue('seg-vencidos', 0, D.seguimientos.vencidos, 1000, true);
-    animateValue('seg-hoy', 0, D.seguimientos.hoy, 1000, true);
-    animateValue('seg-pendientes', 0, D.seguimientos.pendientes, 1000, true);
+    if (D.indicadores_elite) {
+        animateValue('elite-contactos', 0, D.indicadores_elite.contactos, 2000, true);
+        animateValue('elite-reuniones', 0, D.indicadores_elite.reuniones, 2000, true);
+        animateValue('elite-cerrados', 0, D.indicadores_elite.cerrados, 2000, true);
+    }
 
     // --- RING ANIMATION (COBERTURA TOTAL) ---
     const circle = document.getElementById('cobertura-ring');
