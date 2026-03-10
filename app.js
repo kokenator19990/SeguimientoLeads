@@ -1,5 +1,5 @@
 // ========================================
-// OPENCORE STATS — PREMIUM B&W APP LOGIC
+// OPENCORE STATS — PREMIUM B&W + NEON LOGIC
 // ========================================
 
 // --- AUDIO SYSTEM (Web Audio API) ---
@@ -9,9 +9,9 @@ function playClickSound() {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
     osc.connect(gain);
     gain.connect(audioCtx.destination);
@@ -43,22 +43,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            // easeOutQuart
-            const ease = 1 - Math.pow(1 - progress, 4);
+            const ease = 1 - Math.pow(1 - progress, 4); // easeOutQuart
             let val = Math.floor(progress * (end - start) + start);
 
             if (formatStr) {
-                val = val.toLocaleString();
-                if (id.includes('tasa')) val += '%';
-            } else {
                 val = val.toLocaleString();
             }
             obj.innerHTML = val;
             if (progress < 1) {
                 window.requestAnimationFrame(step);
             } else {
-                const finalVal = end.toLocaleString();
-                obj.innerHTML = id.includes('tasa') ? finalVal + '%' : finalVal;
+                obj.innerHTML = end.toLocaleString();
             }
         };
         window.requestAnimationFrame(step);
@@ -68,11 +63,40 @@ document.addEventListener('DOMContentLoaded', () => {
     animateValue('kpi-contactadas-val', 0, D.kpis.contactadas, 1500, true);
     animateValue('kpi-no-val', 0, D.kpis.no_contactadas, 1500, true);
     animateValue('kpi-reuniones-val', 0, D.kpis.reuniones, 1500, true);
-    animateValue('kpi-tasa-val', 0, D.kpis.tasa_conversion, 1500, true);
 
     animateValue('seg-vencidos', 0, D.seguimientos.vencidos, 1000, true);
     animateValue('seg-hoy', 0, D.seguimientos.hoy, 1000, true);
     animateValue('seg-pendientes', 0, D.seguimientos.pendientes, 1000, true);
+
+    // --- RING ANIMATION (COBERTURA TOTAL) ---
+    const circle = document.getElementById('cobertura-ring');
+    const text = document.getElementById('kpi-cobertura-val');
+    const targetPct = D.kpis.cobertura;
+
+    // Circumference of r=45 is approx 283
+    const circumference = 283;
+    circle.style.strokeDasharray = `${circumference} ${circumference}`;
+    circle.style.strokeDashoffset = circumference;
+
+    setTimeout(() => {
+        const offset = circumference - (targetPct / 100) * circumference;
+        circle.style.strokeDashoffset = offset;
+
+        // Animate the text %
+        let startTimestamp = null;
+        const duration = 2000;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 4);
+            let val = (progress * targetPct).toFixed(1);
+            text.innerHTML = val + '%';
+            if (progress < 1) window.requestAnimationFrame(step);
+            else text.innerHTML = targetPct + '%';
+        };
+        window.requestAnimationFrame(step);
+
+    }, 100);
 
     // --- BOSS COMMENTS & REACTIONS SYSTEM ---
     function getContactMeta(contactId) {
@@ -95,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const renderContactCard = (c) => {
-        // Generate simple ID based on name and company to store interaction
         const cid = btoa(unescape(encodeURIComponent((c.nombre || '') + (c.empresa || '')))).substring(0, 20);
         const meta = getContactMeta(cid);
 
@@ -108,9 +131,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="cc-nombre">${c.nombre || 'Sin nombre'}</div>
         <div class="cc-meta">
           <div>CORREO: <span>${c.correo || 'N/A'}</span></div>
-          ${c.linkedin ? `<div>LINKEDIN: <span><a href="${c.linkedin}" target="_blank" style="color:#fff;">Ver Perfil ↗</a></span></div>` : ''}
+          ${c.linkedin ? `<div>LINKEDIN: <span><a href="${c.linkedin}" target="_blank" class="accent-cyan">Ver Perfil ↗</a></span></div>` : ''}
           <div>CONTACTO: <span>${c.medio || 'N/A'} - ${c.fecha || 'N/A'}</span></div>
-          ${c.proximo ? `<div>PRÓXIMO: <span>${c.proximo}</span></div>` : ''}
+          ${c.proximo ? `<div>PRÓXIMO: <span class="accent-yellow">${c.proximo}</span></div>` : ''}
         </div>
         
         <div class="cc-reactions">
@@ -119,9 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <button class="btn-react interactive ${meta.reaction === '⚠️' ? 'active' : ''}" onclick="setReaction(this, '${cid}', '⚠️')">⚠️ REVISAR</button>
             <button class="btn-react interactive ${meta.reaction === '👀' ? 'active' : ''}" onclick="setReaction(this, '${cid}', '👀')">👀 VISTAZO</button>
           </div>
-          <textarea class="boss-comment" placeholder="Dejar comentario para ejecutivo..." 
+          <textarea class="boss-comment" placeholder="Agregar comentario..." 
                     onchange="saveContactMeta('${cid}', 'comment', this.value)">${meta.comment}</textarea>
-          <button class="save-comment-btn interactive">GUARDADO AUTOMÁTICO</button>
+          <button class="save-comment-btn interactive">GUARDADO</button>
         </div>
       </div>
     `;
@@ -131,12 +154,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const contactadasList = document.getElementById('contactadas-list');
     contactadasList.innerHTML = D.contactadas_detail.length ?
         D.contactadas_detail.map(renderContactCard).join('') :
-        '<p class="empty-state">No hay contactos recientes.</p>';
+        '<div class="empty-state">No hay contactos recientes.</div>';
 
     const reunionesList = document.getElementById('reuniones-list');
     reunionesList.innerHTML = D.reuniones_detail.length ?
         D.reuniones_detail.map(renderContactCard).join('') :
-        '<p class="empty-state">No hay reuniones agendadas.</p>';
+        '<div class="empty-state">No hay reuniones agendadas.</div>';
 
     // --- TABLE ---
     const tbody = document.getElementById('segment-tbody');
@@ -144,9 +167,9 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML += `<tr><td>${seg}</td><td>${vals.total.toLocaleString()}</td><td>${vals.contactadas}</td><td>${vals.no_contactadas.toLocaleString()}</td></tr>`;
     }
 
-    // --- CHARTS (B&W Minimalist Theme) ---
+    // --- CHARTS (Neon Accents) ---
     Chart.defaults.color = '#888888';
-    Chart.defaults.borderColor = '#333333';
+    Chart.defaults.borderColor = '#222222';
     Chart.defaults.font.family = "'Inter', sans-serif";
     Chart.defaults.font.size = 11;
     Chart.defaults.font.weight = 600;
@@ -155,7 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-            y: { beginAtZero: true, grid: { color: '#222' }, border: { dash: [4, 4] } },
+            y: { beginAtZero: true, grid: { color: '#222' } },
             x: { grid: { display: false } }
         },
         animation: { duration: 2000, easing: 'easeOutQuart' }
@@ -167,9 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: Object.keys(D.subestados),
             datasets: [{
                 data: Object.values(D.subestados),
-                backgroundColor: ['#FFFFFF', '#CCCCCC', '#999999', '#666666', '#444444', '#222222'],
-                borderWidth: 1,
-                borderColor: '#000'
+                backgroundColor: ['#00E5FF', '#CCCCCC', '#999999', '#666666', '#444444', '#222222'],
+                borderWidth: 0
             }]
         },
         options: chartOpts
@@ -181,8 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: Object.keys(D.canales),
             datasets: [{
                 data: Object.values(D.canales),
-                backgroundColor: ['#FFFFFF', '#888888', '#444444', '#111111'],
-                borderWidth: 2, borderColor: '#000'
+                backgroundColor: ['#00E5FF', '#B200FF', '#444444', '#111111'],
+                borderWidth: 2, borderColor: '#0a0a0a'
             }]
         },
         options: {
@@ -199,8 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: ['TOTAL', 'CONTACTADAS', 'SEGUIMIENTO', 'REUNIONES'],
             datasets: [{
                 data: [D.pipeline.total, D.pipeline.contactadas, D.pipeline.en_seguimiento, D.pipeline.reuniones],
-                backgroundColor: ['#222222', '#555555', '#AAAAAA', '#FFFFFF'],
-                borderWidth: 1, borderColor: '#000'
+                backgroundColor: ['#222222', '#555555', '#AAAAAA', '#E5FF00'],
+                borderWidth: 0
             }]
         },
         options: { ...chartOpts, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { color: '#222' } }, y: { grid: { display: false } } } }
@@ -213,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: convLabels,
             datasets: [
                 { label: 'CONTACTADOS', data: convLabels.map(c => D.conversion_canal[c].contactados), backgroundColor: '#444' },
-                { label: 'REUNIONES', data: convLabels.map(c => D.conversion_canal[c].reuniones), backgroundColor: '#FFF' },
+                { label: 'REUNIONES', data: convLabels.map(c => D.conversion_canal[c].reuniones), backgroundColor: '#00E5FF' },
             ]
         },
         options: {
@@ -236,8 +258,8 @@ window.toggleDetail = function (type) {
 }
 
 // --- REPORTS SYSTEM ---
-function getReports() { return JSON.parse(localStorage.getItem('oc_reports') || '[]'); }
-function saveReports(reports) { localStorage.setItem('oc_reports', JSON.stringify(reports)); }
+function getReports() { return JSON.parse(localStorage.getItem('oc_reports_neon') || '[]'); }
+function saveReports(reports) { localStorage.setItem('oc_reports_neon', JSON.stringify(reports)); }
 
 function loadReports() {
     const reports = getReports();

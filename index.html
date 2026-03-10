@@ -4,10 +4,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Opencore Stats</title>
-  <meta name="description" content="Dashboard Ejecutivo B2B">
+  <title>Opencore Stats V2</title>
+  <meta name="description" content="Dashboard Ejecutivo B2B Premium">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;700&display=swap"
+    rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -31,15 +33,27 @@
 
     <!-- KPI GRID -->
     <section class="kpi-grid" id="kpi-grid">
+      <!-- NEW RING INDICATOR -->
+      <div class="kpi-card ring-card interactive" tabindex="0">
+        <div class="progress-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="bg" cx="50" cy="50" r="45"></circle>
+            <circle class="progress" id="cobertura-ring" cx="50" cy="50" r="45"></circle>
+          </svg>
+          <div class="ring-text fn-count" data-target="0" id="kpi-cobertura-val">0%</div>
+        </div>
+        <div class="kpi-label">COBERTURA BASE</div>
+      </div>
+
       <div class="kpi-card interactive" tabindex="0">
-        <div class="kpi-label">TOTAL PROSPECTOS</div>
+        <div class="kpi-label">TOTAL (ÚNICOS)</div>
         <div class="kpi-value fn-count" data-target="0" id="kpi-total-val">0</div>
-        <div class="kpi-sub">Base Completa</div>
+        <div class="kpi-sub">Prospectos limpios</div>
       </div>
       <div class="kpi-card interactive solid" tabindex="0" onclick="toggleDetail('contactadas')">
         <div class="kpi-label">CONTACTADAS</div>
         <div class="kpi-value fn-count" data-target="0" id="kpi-contactadas-val">0</div>
-        <div class="kpi-sub">Ver Detalle ↗</div>
+        <div class="kpi-sub accent-cyan">VER DETALLE ↗</div>
       </div>
       <div class="kpi-card interactive" tabindex="0">
         <div class="kpi-label">NO CONTACTADAS</div>
@@ -49,12 +63,7 @@
       <div class="kpi-card interactive solid" tabindex="0" onclick="toggleDetail('reuniones')">
         <div class="kpi-label">REUNIONES</div>
         <div class="kpi-value fn-count" data-target="0" id="kpi-reuniones-val">0</div>
-        <div class="kpi-sub">Ver Detalle ↗</div>
-      </div>
-      <div class="kpi-card interactive" tabindex="0">
-        <div class="kpi-label">CONVERSIÓN</div>
-        <div class="kpi-value" id="kpi-tasa-val">0%</div>
-        <div class="kpi-sub">Éxito</div>
+        <div class="kpi-sub accent-cyan">VER DETALLE ↗</div>
       </div>
     </section>
 
@@ -77,26 +86,26 @@
 
     <!-- SEGUIMIENTOS -->
     <div class="section-title">
-      <h2>ESTADO DE SEGUIMIENTO</h2>
+      <h2>PRIORIDAD DE GESTIÓN</h2>
     </div>
     <section class="seg-grid">
-      <div class="seg-card interactive">
-        <div class="seg-label">VENCIDOS</div>
+      <div class="seg-card interactive seg-urgent">
+        <div class="seg-label">1. URGENTE (ATRASADO)</div>
         <div class="seg-value fn-count" data-target="0" id="seg-vencidos">0</div>
       </div>
-      <div class="seg-card interactive solid-invert">
-        <div class="seg-label">PARA HOY</div>
+      <div class="seg-card interactive seg-today">
+        <div class="seg-label">2. HOY</div>
         <div class="seg-value fn-count" data-target="0" id="seg-hoy">0</div>
       </div>
-      <div class="seg-card interactive">
-        <div class="seg-label">PENDIENTES</div>
+      <div class="seg-card interactive seg-future">
+        <div class="seg-label">3. FUTURO</div>
         <div class="seg-value fn-count" data-target="0" id="seg-pendientes">0</div>
       </div>
     </section>
 
     <!-- CHARTS -->
     <div class="section-title">
-      <h2>ANALÍTICA</h2>
+      <h2>ANALÍTICA DINÁMICA</h2>
     </div>
     <section class="charts-grid">
       <div class="chart-box interactive">
@@ -112,23 +121,23 @@
         <canvas id="chart-pipeline"></canvas>
       </div>
       <div class="chart-box interactive">
-        <h3>CONVERSIÓN POR CANAL</h3>
+        <h3>TASA DE ÉXITO POR CANAL</h3>
         <canvas id="chart-conversion"></canvas>
       </div>
     </section>
 
     <!-- TABLE -->
     <div class="section-title">
-      <h2>DESGLOSE POR SEGMENTO</h2>
+      <h2>DESGLOSE ESTRATÉGICO</h2>
     </div>
     <section class="table-container interactive">
       <table id="segment-table">
         <thead>
           <tr>
             <th>Segmento</th>
-            <th>Total</th>
+            <th>Total Base</th>
             <th>Contactadas</th>
-            <th>No Contactadas</th>
+            <th>Restantes</th>
           </tr>
         </thead>
         <tbody id="segment-tbody"></tbody>
@@ -138,7 +147,7 @@
     <!-- REPORTS -->
     <div class="section-title">
       <h2>TABLÓN DE ANUNCIOS</h2>
-      <button class="btn-primary interactive" onclick="openReportModal()">NUEVO REPORTE</button>
+      <button class="btn-primary interactive" onclick="openReportModal()">+ NUEVO REPORTE</button>
     </div>
     <section class="reports-list" id="reports-list">
       <div class="empty-state">No hay reportes.</div>
@@ -156,7 +165,7 @@
       <form id="report-form" onsubmit="saveReport(event)">
         <div class="form-group">
           <label>TÍTULO</label>
-          <input type="text" id="report-title" required>
+          <input type="text" id="report-title" placeholder="Ej: Superamos 5% en Respuestas" required>
         </div>
         <div class="form-group">
           <label>DETALLE</label>
@@ -167,7 +176,7 @@
           <input type="file" id="report-img" accept="image/*">
           <div class="img-preview" id="img-preview"></div>
         </div>
-        <button type="submit" class="btn-primary btn-full interactive">COMPARTIR</button>
+        <button type="submit" class="btn-primary btn-full interactive">COMPARTIR AL EQUIPO</button>
       </form>
     </div>
   </div>
@@ -175,7 +184,7 @@
   <!-- FOOTER -->
   <footer class="footer">
     <div class="logo-mark small"></div>
-    <p>OPENCORE STATS V2.0 // EJECUTIVO B2B</p>
+    <p>OPENCORE STATS V2.5 // ELITE DASHBOARD</p>
   </footer>
 
   <script src="data.js"></script>

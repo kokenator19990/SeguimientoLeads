@@ -1,26 +1,27 @@
 const DASHBOARD_DATA = {
   "kpis": {
-    "total_prospectos": 4196,
+    "total_prospectos": 2199,
     "contactadas": 0,
-    "no_contactadas": 4196,
+    "no_contactadas": 2199,
     "reuniones": 0,
-    "tasa_conversion": 0
+    "tasa_conversion": 0,
+    "cobertura": 0.0
   },
   "segments": {
     "VIP Top": {
-      "total": 999,
+      "total": 400,
       "contactadas": 0,
-      "no_contactadas": 999
+      "no_contactadas": 400
     },
     "Intelig. Mercado": {
-      "total": 999,
+      "total": 6,
       "contactadas": 0,
-      "no_contactadas": 999
+      "no_contactadas": 6
     },
     "Base Completa": {
-      "total": 2198,
+      "total": 1793,
       "contactadas": 0,
-      "no_contactadas": 2198
+      "no_contactadas": 1793
     }
   },
   "subestados": {
@@ -38,7 +39,7 @@ const DASHBOARD_DATA = {
     "Contacto Directo": 0
   },
   "pipeline": {
-    "total": 4196,
+    "total": 2199,
     "contactadas": 0,
     "en_seguimiento": 0,
     "reuniones": 0
@@ -50,7 +51,7 @@ const DASHBOARD_DATA = {
   },
   "contactadas_detail": [],
   "reuniones_detail": [],
-  "updated": "10/03/2026 16:16",
+  "updated": "10/03/2026 16:52",
   "conversion_canal": {
     "LinkedIn": {
       "contactados": 0,
