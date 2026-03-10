@@ -386,5 +386,70 @@ function loadReports() {
       <div class="ri-head"><div><div class="ri-title">${r.title}</div><div class="ri-date">${r.date}</div></div>
       <button class="ri-delete interactive" onclick="deleteReport(${i})">ELIMINAR</button></div>
       <div class="ri-desc">${r.desc.replace(/\n/g, '<br>')}</div>
+      ${r.img ? `<img class="ri-img" src="${r.img}" alt="Adjunto">` : ''}
     </div>`).join('') : '<div class="empty-state">No hay reportes.</div>';
 }
+
+window.openReportModal = () => document.getElementById('modal-overlay').classList.add('active');
+window.closeReportModal = () => {
+    document.getElementById('modal-overlay').classList.remove('active');
+    document.getElementById('report-form').reset();
+    document.getElementById('img-preview').innerHTML = '';
+};
+
+window.saveReport = (e) => {
+    e.preventDefault();
+    const title = document.getElementById('report-title').value;
+    const desc = document.getElementById('report-desc').value;
+    const fileInput = document.getElementById('report-img');
+
+    const finalize = (imgData) => {
+        const reports = JSON.parse(localStorage.getItem('oc_reports_neon') || '[]');
+        reports.unshift({
+            title, desc, img: imgData,
+            date: new Date().toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+        });
+        localStorage.setItem('oc_reports_neon', JSON.stringify(reports));
+        loadReports();
+        closeReportModal();
+    };
+
+    if (fileInput.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (ev) => finalize(ev.target.result);
+        reader.readAsDataURL(fileInput.files[0]);
+    } else finalize(null);
+};
+
+window.deleteReport = (index) => {
+    if (confirm('¿Eliminar reporte?')) {
+        const reports = JSON.parse(localStorage.getItem('oc_reports_neon') || '[]');
+        reports.splice(index, 1);
+        localStorage.setItem('oc_reports_neon', JSON.stringify(reports));
+        loadReports();
+    }
+};
+
+document.getElementById('report-img').addEventListener('change', function () {
+    const preview = document.getElementById('img-preview');
+    if (this.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (e) => { preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`; };
+        reader.readAsDataURL(this.files[0]);
+    } else preview.innerHTML = '';
+});
+
+// --- CHART TOGGLE HANDLER ---
+document.querySelectorAll('[data-chart-toggle]').forEach(box => {
+    box.addEventListener('click', () => {
+        box.classList.toggle('collapsed');
+        // After expanding, tell Chart.js to recalculate size
+        setTimeout(() => {
+            const canvas = box.querySelector('canvas');
+            if (canvas) {
+                const chartInstance = Chart.getChart(canvas);
+                if (chartInstance) chartInstance.resize();
+            }
+        }, 500);
+    });
+});
