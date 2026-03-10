@@ -311,197 +311,194 @@ function renderDashboard() {
         tbody.innerHTML += `<tr><td>${seg}</td><td>${vals.total.toLocaleString()}</td><td>${vals.contactadas}</td><td>${vals.no_contactadas.toLocaleString()}</td></tr>`;
     }
 
-    // --- CHARTS ---
-    const ctxEstados = document.getElementById('chart-estados').getContext('2d');
-    const ctxCanales = document.getElementById('chart-canales').getContext('2d');
-    const ctxPipeline = document.getElementById('chart-pipeline').getContext('2d');
-    const ctxConversion = document.getElementById('chart-conversion').getContext('2d');
-
-    // Gradient Generators
-    const getGrad = (ctx, c1, c2) => {
-        const g = ctx.createLinearGradient(0, 0, 0, 350);
-        g.addColorStop(0, c1);
-        g.addColorStop(1, c2);
-        return g;
-    };
-    const getGradH = (ctx, c1, c2) => {
-        const g = ctx.createLinearGradient(0, 0, 400, 0);
-        g.addColorStop(0, c1);
-        g.addColorStop(1, c2);
-        return g;
-    };
-
-    // Global Chart Settings for Premium Look
-    Chart.defaults.color = '#A0AEC0';
-    Chart.defaults.font.family = "'Space Grotesk', 'Inter', sans-serif";
-    Chart.defaults.font.size = 11;
-    Chart.defaults.font.weight = 500;
-
-    const commonOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: 'rgba(10, 10, 15, 0.95)',
-                titleColor: '#00E5FF',
-                titleFont: { size: 13, family: "'Space Grotesk', sans-serif", weight: 'bold' },
-                bodyColor: '#ffffff',
-                bodyFont: { size: 12, family: "'Inter', sans-serif" },
-                borderColor: 'rgba(0, 229, 255, 0.2)',
-                borderWidth: 1,
-                padding: 14,
-                cornerRadius: 8,
-                displayColors: true,
-                boxPadding: 6,
-                usePointStyle: true
-            }
+    // --- CHARTS (ECHARTS) ---
+    const chartOptsEstados = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(10, 10, 15, 0.95)',
+            borderColor: 'rgba(0, 229, 255, 0.2)',
+            textStyle: { color: '#fff', fontFamily: 'Inter' }
         },
-        interaction: { mode: 'index', intersect: false },
-        animation: { duration: 2500, easing: 'easeOutQuart' },
-        elements: {
-            bar: { borderRadius: 4, borderSkipped: false }
-        }
+        grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: Object.keys(D.subestados),
+            axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } },
+            axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11, rotate: 15 }
+        },
+        yAxis: {
+            type: 'value',
+            splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } },
+            axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }
+        },
+        series: [{
+            name: 'Gestiones',
+            type: 'bar',
+            barWidth: '40%',
+            itemStyle: {
+                borderRadius: [6, 6, 0, 0],
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: '#00E5FF' },
+                    { offset: 1, color: 'rgba(0, 229, 255, 0.05)' }
+                ]),
+                shadowColor: 'rgba(0, 229, 255, 0.5)',
+                shadowBlur: 15
+            },
+            data: Object.values(D.subestados)
+        }]
     };
 
-    const commonScales = {
-        y: {
-            beginAtZero: true,
-            grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
-            border: { display: false }
-        },
-        x: {
-            grid: { display: false, drawBorder: false },
-            border: { display: false }
-        }
-    };
-
-    // 1. ESTADO DE GESTIÓN (Vertical Bar)
-    if (window.cEstados) window.cEstados.destroy();
-    window.cEstados = new Chart(ctxEstados, {
-        type: 'bar',
-        data: {
-            labels: Object.keys(D.subestados),
-            datasets: [{
-                label: 'Gestiones',
-                data: Object.values(D.subestados),
-                backgroundColor: [
-                    getGrad(ctxEstados, '#00E5FF', 'rgba(0, 229, 255, 0.05)'),
-                    getGrad(ctxEstados, '#B200FF', 'rgba(178, 0, 255, 0.05)'),
-                    getGrad(ctxEstados, '#FF2A2A', 'rgba(255, 42, 42, 0.05)'),
-                    getGrad(ctxEstados, '#E5FF00', 'rgba(229, 255, 0, 0.05)'),
-                    getGrad(ctxEstados, '#00FFAA', 'rgba(0, 255, 170, 0.05)'),
-                    getGrad(ctxEstados, '#888888', 'rgba(136, 136, 136, 0.05)')
-                ],
-                borderColor: ['#00E5FF', '#B200FF', '#FF2A2A', '#E5FF00', '#00FFAA', '#888888'],
-                borderWidth: 1.5,
-                hoverBackgroundColor: ['#00E5FF', '#B200FF', '#FF2A2A', '#E5FF00', '#00FFAA', '#888888'],
-                barPercentage: 0.6
-            }]
-        },
-        options: { ...commonOptions, scales: commonScales }
-    });
+    if (window.cEstados) window.cEstados.dispose();
+    window.cEstados = echarts.init(document.getElementById('chart-estados'), 'dark');
+    window.cEstados.setOption(chartOptsEstados);
 
     // 2. CANAL DE CONTACTO (Doughnut)
-    if (window.cCanales) window.cCanales.destroy();
-    window.cCanales = new Chart(ctxCanales, {
-        type: 'doughnut',
-        data: {
-            labels: Object.keys(D.canales),
-            datasets: [{
-                data: Object.values(D.canales),
-                backgroundColor: ['#00E5FF', '#B200FF', '#E5FF00', '#FF2A2A', '#00FFAA', '#444444'],
-                borderWidth: 0,
-                hoverOffset: 20,
-                spacing: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '82%',
-            layout: { padding: 10 },
-            plugins: {
-                legend: {
-                    position: 'right',
-                    labels: { usePointStyle: true, pointStyle: 'circle', padding: 20, color: '#A0AEC0', font: { size: 11 } }
-                },
-                tooltip: commonOptions.plugins.tooltip
-            },
-            animation: { animateScale: true, animateRotate: true, duration: 3000, easing: 'easeOutExpo' }
+    const pieColors = ['#00E5FF', '#B200FF', '#E5FF00', '#FF2A2A', '#00FFAA', '#444444'];
+    const pieData = Object.keys(D.canales).map((k, i) => ({
+        name: k, value: D.canales[k],
+        itemStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [
+                { offset: 0, color: pieColors[i] },
+                { offset: 1, color: pieColors[i] + '40' }
+            ]),
+            shadowColor: pieColors[i],
+            shadowBlur: 10
         }
+    }));
+
+    if (window.cCanales) window.cCanales.dispose();
+    window.cCanales = echarts.init(document.getElementById('chart-canales'), 'dark');
+    window.cCanales.setOption({
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'item',
+            backgroundColor: 'rgba(10, 10, 15, 0.95)',
+            borderColor: 'rgba(178, 0, 255, 0.2)',
+            textStyle: { color: '#fff', fontFamily: 'Inter' },
+            borderWidth: 1
+        },
+        legend: {
+            bottom: '0%',
+            left: 'center',
+            textStyle: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 },
+            itemGap: 20,
+            icon: 'circle'
+        },
+        series: [{
+            name: 'Canal',
+            type: 'pie',
+            radius: ['55%', '80%'],
+            center: ['50%', '45%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+                borderRadius: 10,
+                borderColor: '#141414',
+                borderWidth: 3
+            },
+            label: { show: false },
+            data: pieData
+        }]
     });
 
     // 3. EMBUDO DE VENTAS (Horizontal Bar)
-    if (window.cPipeline) window.cPipeline.destroy();
-    window.cPipeline = new Chart(ctxPipeline, {
-        type: 'bar',
-        data: {
-            labels: ['TOTAL', 'CONTACTADAS', 'SEGUIMIENTO', 'REUNIONES'],
-            datasets: [{
-                label: 'Oportunidades',
-                data: [D.pipeline.total, D.pipeline.contactadas, D.pipeline.en_seguimiento, D.pipeline.reuniones],
-                backgroundColor: [
-                    getGradH(ctxPipeline, '#444444', 'rgba(68, 68, 68, 0.05)'),
-                    getGradH(ctxPipeline, '#B200FF', 'rgba(178, 0, 255, 0.05)'),
-                    getGradH(ctxPipeline, '#00E5FF', 'rgba(0, 229, 255, 0.05)'),
-                    getGradH(ctxPipeline, '#E5FF00', 'rgba(229, 255, 0, 0.05)')
-                ],
-                borderColor: ['#666666', '#B200FF', '#00E5FF', '#E5FF00'],
-                borderWidth: 1.5,
-                hoverBackgroundColor: ['#666666', '#B200FF', '#00E5FF', '#E5FF00'],
-                barPercentage: 0.5
-            }]
+    if (window.cPipeline) window.cPipeline.dispose();
+    window.cPipeline = echarts.init(document.getElementById('chart-pipeline'), 'dark');
+    window.cPipeline.setOption({
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(10, 10, 15, 0.95)',
+            borderColor: 'rgba(229, 255, 0, 0.2)',
+            textStyle: { color: '#fff', fontFamily: 'Inter' }
         },
-        options: {
-            ...commonOptions,
-            indexAxis: 'y',
-            scales: {
-                x: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false }, border: { display: false } },
-                y: { grid: { display: false, drawBorder: false }, border: { display: false } }
-            }
-        }
+        grid: { left: '3%', right: '4%', bottom: '3%', top: '5%', containLabel: true },
+        xAxis: {
+            type: 'value',
+            splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } },
+            axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }
+        },
+        yAxis: {
+            type: 'category',
+            data: ['TOTAL', 'CONTACTADAS', 'SEGUIMIENTO', 'REUNIONES'].reverse(),
+            axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } },
+            axisLabel: { color: '#fff', fontFamily: 'Space Grotesk', fontSize: 11, fontWeight: 'bold' }
+        },
+        series: [{
+            name: 'Oportunidades',
+            type: 'bar',
+            barWidth: '40%',
+            data: [
+                { value: D.pipeline.reuniones, itemStyle: { color: '#E5FF00', shadowColor: 'rgba(229, 255, 0, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
+                { value: D.pipeline.en_seguimiento, itemStyle: { color: '#00E5FF', shadowColor: 'rgba(0, 229, 255, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
+                { value: D.pipeline.contactadas, itemStyle: { color: '#B200FF', shadowColor: 'rgba(178, 0, 255, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
+                { value: D.pipeline.total, itemStyle: { color: '#444444', shadowColor: 'rgba(68, 68, 68, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } }
+            ]
+        }]
     });
 
     // 4. TASA DE ÉXITO POR CANAL (Grouped Bar)
     const convLabels = Object.keys(D.conversion_canal);
-    if (window.cConversion) window.cConversion.destroy();
-    window.cConversion = new Chart(ctxConversion, {
-        type: 'bar',
-        data: {
-            labels: convLabels,
-            datasets: [
-                {
-                    label: 'CONTACTADOS',
-                    data: convLabels.map(c => D.conversion_canal[c].contactados),
-                    backgroundColor: getGrad(ctxConversion, '#444444', 'rgba(68, 68, 68, 0.05)'),
-                    borderColor: '#666666',
-                    borderWidth: 1.5,
-                    barPercentage: 0.7
-                },
-                {
-                    label: 'REUNIONES',
-                    data: convLabels.map(c => D.conversion_canal[c].reuniones),
-                    backgroundColor: getGrad(ctxConversion, '#00E5FF', 'rgba(0, 229, 255, 0.05)'),
-                    borderColor: '#00E5FF',
-                    borderWidth: 1.5,
-                    barPercentage: 0.7
-                },
-            ]
+    if (window.cConversion) window.cConversion.dispose();
+    window.cConversion = echarts.init(document.getElementById('chart-conversion'), 'dark');
+    window.cConversion.setOption({
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            backgroundColor: 'rgba(10, 10, 15, 0.95)',
+            borderColor: 'rgba(0, 229, 255, 0.2)',
+            textStyle: { color: '#fff', fontFamily: 'Inter' }
         },
-        options: {
-            ...commonOptions,
-            plugins: {
-                ...commonOptions.plugins,
-                legend: {
-                    display: true,
-                    position: 'top',
-                    align: 'end',
-                    labels: { usePointStyle: true, pointStyle: 'circle', color: '#A0AEC0', padding: 20 }
-                }
+        legend: {
+            top: '0%',
+            right: '0%',
+            textStyle: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 },
+            icon: 'circle'
+        },
+        grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+        xAxis: {
+            type: 'category',
+            data: convLabels,
+            axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } },
+            axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11, rotate: 15 }
+        },
+        yAxis: {
+            type: 'value',
+            splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } },
+            axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }
+        },
+        series: [
+            {
+                name: 'CONTACTADOS',
+                type: 'bar',
+                barGap: '10%',
+                itemStyle: {
+                    borderRadius: [4, 4, 0, 0],
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: '#444444' },
+                        { offset: 1, color: 'rgba(68, 68, 68, 0.1)' }
+                    ])
+                },
+                data: convLabels.map(c => D.conversion_canal[c].contactados)
             },
-            scales: commonScales
-        }
+            {
+                name: 'REUNIONES',
+                type: 'bar',
+                itemStyle: {
+                    borderRadius: [4, 4, 0, 0],
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: '#00E5FF' },
+                        { offset: 1, color: 'rgba(0, 229, 255, 0.1)' }
+                    ]),
+                    shadowColor: 'rgba(0, 229, 255, 0.5)',
+                    shadowBlur: 10
+                },
+                data: convLabels.map(c => D.conversion_canal[c].reuniones)
+            }
+        ]
     });
 
     loadReports();
@@ -579,13 +576,19 @@ document.getElementById('report-img').addEventListener('change', function () {
 document.querySelectorAll('[data-chart-toggle]').forEach(box => {
     box.addEventListener('click', () => {
         box.classList.toggle('collapsed');
-        // After expanding, tell Chart.js to recalculate size
+        // After expanding, tell ECharts to recalculate size
         setTimeout(() => {
-            const canvas = box.querySelector('canvas');
-            if (canvas) {
-                const chartInstance = Chart.getChart(canvas);
-                if (chartInstance) chartInstance.resize();
-            }
+            if (window.cEstados) window.cEstados.resize();
+            if (window.cCanales) window.cCanales.resize();
+            if (window.cPipeline) window.cPipeline.resize();
+            if (window.cConversion) window.cConversion.resize();
         }, 500);
     });
+});
+
+window.addEventListener('resize', () => {
+    if (window.cEstados) window.cEstados.resize();
+    if (window.cCanales) window.cCanales.resize();
+    if (window.cPipeline) window.cPipeline.resize();
+    if (window.cConversion) window.cConversion.resize();
 });

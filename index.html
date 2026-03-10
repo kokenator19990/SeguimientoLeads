@@ -10,7 +10,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;700&display=swap"
     rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -37,36 +38,45 @@
     <!-- KPI GRID -->
     <section class="kpi-grid" id="kpi-grid">
       <!-- NEW RING INDICATOR -->
-      <div class="kpi-card ring-card interactive" tabindex="0">
-        <div class="progress-ring">
+      <div class="kpi-card ring-card interactive" tabindex="0" data-tilt data-tilt-max="5" data-tilt-speed="400"
+        data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
+        <div class="progress-ring" style="transform: translateZ(20px);">
           <svg viewBox="0 0 100 100">
             <circle class="bg" cx="50" cy="50" r="45"></circle>
             <circle class="progress" id="cobertura-ring" cx="50" cy="50" r="45"></circle>
           </svg>
           <div class="ring-text fn-count" data-target="0" id="kpi-cobertura-val">0%</div>
         </div>
-        <div class="kpi-label">COBERTURA BASE</div>
+        <div class="kpi-label" style="transform: translateZ(30px);">COBERTURA BASE</div>
       </div>
 
-      <div class="kpi-card interactive" tabindex="0">
-        <div class="kpi-label">TOTAL (ÚNICOS)</div>
-        <div class="kpi-value fn-count" data-target="0" id="kpi-total-val">0</div>
-        <div class="kpi-sub">Prospectos limpios</div>
+      <div class="kpi-card interactive" tabindex="0" data-tilt data-tilt-max="5" data-tilt-speed="400"
+        data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
+        <div class="kpi-label" style="transform: translateZ(20px);">TOTAL (ÚNICOS)</div>
+        <div class="kpi-value fn-count" data-target="0" id="kpi-total-val" style="transform: translateZ(40px);">0</div>
+        <div class="kpi-sub" style="transform: translateZ(20px);">Prospectos limpios</div>
       </div>
-      <div class="kpi-card interactive solid" tabindex="0" onclick="toggleDetail('contactadas')">
-        <div class="kpi-label">CONTACTADAS</div>
-        <div class="kpi-value fn-count" data-target="0" id="kpi-contactadas-val">0</div>
-        <div class="kpi-sub accent-cyan">VER DETALLE ↗</div>
+      <div class="kpi-card interactive solid" tabindex="0" onclick="toggleDetail('contactadas')" data-tilt
+        data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1"
+        style="transform-style: preserve-3d;">
+        <div class="kpi-label" style="transform: translateZ(20px);">CONTACTADAS</div>
+        <div class="kpi-value fn-count" data-target="0" id="kpi-contactadas-val" style="transform: translateZ(40px);">0
+        </div>
+        <div class="kpi-sub accent-cyan" style="transform: translateZ(30px);">VER DETALLE ↗</div>
       </div>
-      <div class="kpi-card interactive" tabindex="0">
-        <div class="kpi-label">NO CONTACTADAS</div>
-        <div class="kpi-value fn-count" data-target="0" id="kpi-no-val">0</div>
-        <div class="kpi-sub">Por Gestionar</div>
+      <div class="kpi-card interactive" tabindex="0" data-tilt data-tilt-max="5" data-tilt-speed="400"
+        data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
+        <div class="kpi-label" style="transform: translateZ(20px);">NO CONTACTADAS</div>
+        <div class="kpi-value fn-count" data-target="0" id="kpi-no-val" style="transform: translateZ(40px);">0</div>
+        <div class="kpi-sub" style="transform: translateZ(20px);">Por Gestionar</div>
       </div>
-      <div class="kpi-card interactive solid" tabindex="0" onclick="toggleDetail('reuniones')">
-        <div class="kpi-label">REUNIONES</div>
-        <div class="kpi-value fn-count" data-target="0" id="kpi-reuniones-val">0</div>
-        <div class="kpi-sub accent-cyan">VER DETALLE ↗</div>
+      <div class="kpi-card interactive solid" tabindex="0" onclick="toggleDetail('reuniones')" data-tilt
+        data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1"
+        style="transform-style: preserve-3d;">
+        <div class="kpi-label" style="transform: translateZ(20px);">REUNIONES</div>
+        <div class="kpi-value fn-count" data-target="0" id="kpi-reuniones-val" style="transform: translateZ(40px);">0
+        </div>
+        <div class="kpi-sub accent-cyan" style="transform: translateZ(30px);">VER DETALLE ↗</div>
       </div>
     </section>
 
@@ -92,20 +102,26 @@
       <h2>RENDIMIENTO COMERCIAL</h2>
     </div>
     <section class="elite-grid">
-      <div class="elite-card interactive bg-accent-cyan">
+      <div class="elite-card interactive bg-accent-cyan" data-tilt data-tilt-max="4" data-tilt-speed="400"
+        data-tilt-glare="true" data-tilt-max-glare="0.2" style="transform-style: preserve-3d;">
         <div class="elite-glow"></div>
-        <div class="elite-label">CONTACTOS REALIZADOS</div>
-        <div class="elite-value fn-count" data-target="0" id="elite-contactos">0</div>
+        <div class="elite-label" style="transform: translateZ(30px);">CONTACTOS REALIZADOS</div>
+        <div class="elite-value fn-count" data-target="0" id="elite-contactos" style="transform: translateZ(50px);">0
+        </div>
       </div>
-      <div class="elite-card interactive bg-accent-yellow">
+      <div class="elite-card interactive bg-accent-yellow" data-tilt data-tilt-max="4" data-tilt-speed="400"
+        data-tilt-glare="true" data-tilt-max-glare="0.2" style="transform-style: preserve-3d;">
         <div class="elite-glow"></div>
-        <div class="elite-label">NUEVAS REUNIONES</div>
-        <div class="elite-value fn-count" data-target="0" id="elite-reuniones">0</div>
+        <div class="elite-label" style="transform: translateZ(30px);">NUEVAS REUNIONES</div>
+        <div class="elite-value fn-count" data-target="0" id="elite-reuniones" style="transform: translateZ(50px);">0
+        </div>
       </div>
-      <div class="elite-card interactive bg-accent-red">
+      <div class="elite-card interactive bg-accent-red" data-tilt data-tilt-max="4" data-tilt-speed="400"
+        data-tilt-glare="true" data-tilt-max-glare="0.2" style="transform-style: preserve-3d;">
         <div class="elite-glow"></div>
-        <div class="elite-label">PROYECTOS CERRADOS</div>
-        <div class="elite-value fn-count" data-target="0" id="elite-cerrados">0</div>
+        <div class="elite-label" style="transform: translateZ(30px);">PROYECTOS CERRADOS</div>
+        <div class="elite-value fn-count" data-target="0" id="elite-cerrados" style="transform: translateZ(50px);">0
+        </div>
       </div>
     </section>
 
@@ -114,21 +130,33 @@
       <h2>ANALÍTICA DINÁMICA</h2>
     </div>
     <section class="charts-grid">
-      <div class="chart-box interactive" data-chart-toggle>
-        <h3>ESTADO DE GESTIÓN <span class="expand-hint">↕</span></h3>
-        <div class="chart-inner"><canvas id="chart-estados"></canvas></div>
+      <div class="chart-box interactive" data-chart-toggle data-tilt data-tilt-max="1.5" data-tilt-speed="400"
+        data-tilt-glare="true" data-tilt-max-glare="0.05" style="transform-style: preserve-3d;">
+        <h3 style="transform: translateZ(20px);">ESTADO DE GESTIÓN <span class="expand-hint">↕</span></h3>
+        <div class="chart-inner" style="transform: translateZ(10px);">
+          <div id="chart-estados" style="width: 100%; height: 100%; min-height: 350px;"></div>
+        </div>
       </div>
-      <div class="chart-box interactive" data-chart-toggle>
-        <h3>CANAL DE CONTACTO <span class="expand-hint">↕</span></h3>
-        <div class="chart-inner"><canvas id="chart-canales"></canvas></div>
+      <div class="chart-box interactive" data-chart-toggle data-tilt data-tilt-max="1.5" data-tilt-speed="400"
+        data-tilt-glare="true" data-tilt-max-glare="0.05" style="transform-style: preserve-3d;">
+        <h3 style="transform: translateZ(20px);">CANAL DE CONTACTO <span class="expand-hint">↕</span></h3>
+        <div class="chart-inner" style="transform: translateZ(10px);">
+          <div id="chart-canales" style="width: 100%; height: 100%; min-height: 350px;"></div>
+        </div>
       </div>
-      <div class="chart-box interactive" data-chart-toggle>
-        <h3>EMBUDO DE VENTAS <span class="expand-hint">↕</span></h3>
-        <div class="chart-inner"><canvas id="chart-pipeline"></canvas></div>
+      <div class="chart-box interactive" data-chart-toggle data-tilt data-tilt-max="1.5" data-tilt-speed="400"
+        data-tilt-glare="true" data-tilt-max-glare="0.05" style="transform-style: preserve-3d;">
+        <h3 style="transform: translateZ(20px);">EMBUDO DE VENTAS <span class="expand-hint">↕</span></h3>
+        <div class="chart-inner" style="transform: translateZ(10px);">
+          <div id="chart-pipeline" style="width: 100%; height: 100%; min-height: 350px;"></div>
+        </div>
       </div>
-      <div class="chart-box interactive" data-chart-toggle>
-        <h3>TASA DE ÉXITO POR CANAL <span class="expand-hint">↕</span></h3>
-        <div class="chart-inner"><canvas id="chart-conversion"></canvas></div>
+      <div class="chart-box interactive" data-chart-toggle data-tilt data-tilt-max="1.5" data-tilt-speed="400"
+        data-tilt-glare="true" data-tilt-max-glare="0.05" style="transform-style: preserve-3d;">
+        <h3 style="transform: translateZ(20px);">TASA DE ÉXITO POR CANAL <span class="expand-hint">↕</span></h3>
+        <div class="chart-inner" style="transform: translateZ(10px);">
+          <div id="chart-conversion" style="width: 100%; height: 100%; min-height: 350px;"></div>
+        </div>
       </div>
     </section>
 
