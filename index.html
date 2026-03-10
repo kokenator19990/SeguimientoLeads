@@ -23,28 +23,7 @@
   <header class="header">
     <div class="header-inner">
       <div class="logo">
-        <svg class="oc-logo" viewBox="0 0 520 50" xmlns="http://www.w3.org/2000/svg"
-          shape-rendering="geometricPrecision">
-          <!-- OPEN -->
-          <text x="0" y="32" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="34"
-            letter-spacing="3">OPEN</text>
-          <!-- Iconic C(O) glyph -->
-          <g transform="translate(130, 5)">
-            <circle cx="20" cy="20" r="18" fill="none" stroke="#FFFFFF" stroke-width="5" />
-            <circle cx="20" cy="20" r="8" fill="none" stroke="#FFFFFF" stroke-width="4" />
-          </g>
-          <!-- RE -->
-          <text x="175" y="32" fill="#FFFFFF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="34"
-            letter-spacing="3">RE</text>
-          <!-- SOFTWARE -->
-          <text x="1" y="47" fill="#555555" font-family="'Inter', sans-serif" font-weight="500" font-size="10"
-            letter-spacing="5">SOFTWARE</text>
-          <!-- vertical divider -->
-          <line x1="230" y1="6" x2="230" y2="40" stroke="#333333" stroke-width="1" />
-          <!-- STATS -->
-          <text x="245" y="30" fill="#00E5FF" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="24"
-            letter-spacing="4">STATS</text>
-        </svg>
+        <span class="logo-text">OpenCORE <span class="logo-accent">Stats</span></span>
       </div>
       <div class="header-meta">
         <span class="badge" id="update-date">Cargando datos...</span>
@@ -134,21 +113,21 @@
       <h2>ANALÍTICA DINÁMICA</h2>
     </div>
     <section class="charts-grid">
-      <div class="chart-box interactive">
-        <h3>ESTADO DE GESTIÓN</h3>
-        <canvas id="chart-estados"></canvas>
+      <div class="chart-box interactive collapsed" onclick="this.classList.toggle('collapsed')">
+        <h3>ESTADO DE GESTIÓN <span class="expand-hint">↕</span></h3>
+        <div class="chart-inner"><canvas id="chart-estados"></canvas></div>
       </div>
-      <div class="chart-box interactive">
-        <h3>CANAL DE CONTACTO</h3>
-        <canvas id="chart-canales"></canvas>
+      <div class="chart-box interactive collapsed" onclick="this.classList.toggle('collapsed')">
+        <h3>CANAL DE CONTACTO <span class="expand-hint">↕</span></h3>
+        <div class="chart-inner"><canvas id="chart-canales"></canvas></div>
       </div>
-      <div class="chart-box interactive">
-        <h3>EMBUDO DE VENTAS</h3>
-        <canvas id="chart-pipeline"></canvas>
+      <div class="chart-box interactive collapsed" onclick="this.classList.toggle('collapsed')">
+        <h3>EMBUDO DE VENTAS <span class="expand-hint">↕</span></h3>
+        <div class="chart-inner"><canvas id="chart-pipeline"></canvas></div>
       </div>
-      <div class="chart-box interactive">
-        <h3>TASA DE ÉXITO POR CANAL</h3>
-        <canvas id="chart-conversion"></canvas>
+      <div class="chart-box interactive collapsed" onclick="this.classList.toggle('collapsed')">
+        <h3>TASA DE ÉXITO POR CANAL <span class="expand-hint">↕</span></h3>
+        <div class="chart-inner"><canvas id="chart-conversion"></canvas></div>
       </div>
     </section>
 

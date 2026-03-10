@@ -187,6 +187,24 @@ h3 {
   border-radius: 2px;
 }
 
+/* LOGO TEXT */
+.logo-text {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px;
+  color: var(--text-main);
+  text-transform: uppercase;
+}
+
+.logo-accent {
+  color: var(--accent-cyan);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: lowercase;
+  text-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
+}
+
 /* CONTAINER */
 .container {
   position: relative;
@@ -634,12 +652,62 @@ h3 {
 
 .chart-box {
   border: 1px solid var(--border);
-  padding: 2rem;
   background: var(--bg-panel);
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+  cursor: pointer;
 }
 
 .chart-box:hover {
-  border-color: var(--text-dim);
+  border-color: var(--accent-cyan);
+}
+
+.chart-box h3 {
+  padding: 1.2rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  transition: color 0.3s;
+}
+
+.chart-box:hover h3 {
+  color: var(--text-main);
+}
+
+.expand-hint {
+  color: var(--accent-cyan);
+  font-size: 1rem;
+  opacity: 0.5;
+  transition: opacity 0.3s, transform 0.3s;
+  display: inline-block;
+}
+
+.chart-box:hover .expand-hint {
+  opacity: 1;
+}
+
+.chart-inner {
+  overflow: hidden;
+  max-height: 0;
+  padding: 0 1.5rem;
+  transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1), padding 0.4s ease;
+}
+
+.chart-box:not(.collapsed) .chart-inner {
+  max-height: 320px;
+  padding: 1.5rem;
+}
+
+.chart-box:not(.collapsed) .expand-hint {
+  transform: rotate(180deg);
+  opacity: 1;
 }
 
 /* TABLE */
