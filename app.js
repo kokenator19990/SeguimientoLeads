@@ -4,11 +4,11 @@
 
 // ID DOC: 13Up7JXKbF4xrbwGF0Hwh01Vnu_8fFevGgBUE9O7QgQ
 // (Reemplazar la ID a futuro si se hace una copia)
-const SHEET_ID = '13Up7JXKbF4xrbwGF0Hwh01Vnu_8fFevGgBUE9O7QgQ';
+const SHEET_ID = '2PACX-1vR3QU-L6FxcRuM4okfwd3BS-1xBGJVHFbjlekbbdeeAbxuSG5Yrm7GlxT2PoTYOW58K6mNiZMh3dm7K';
 const SHEETS_TO_LOAD = [
-    { name: 'CUENTAS_VIP_TOP', gid: '606958099', label: 'VIP Top' },
+    { name: 'CUENTAS_VIP_TOP', gid: '216976702', label: 'VIP Top' },
     { name: 'INTELIGENCIA_MERCADO', gid: '45399', label: 'Intelig. Mercado' },
-    { name: 'BASE_COMPLETA_LIMPIA', gid: '1984486754', label: 'Base Completa' }
+    { name: 'BASE_COMPLETA_LIMPIA', gid: '606958099', label: 'Base Completa' }
 ];
 
 // --- AUDIO SYSTEM ---
