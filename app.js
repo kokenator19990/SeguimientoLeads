@@ -1,6 +1,30 @@
 // ========================================
-// OPENCORE STATS — DASHBOARD APP
+// OPENCORE STATS — PREMIUM B&W APP LOGIC
 // ========================================
+
+// --- AUDIO SYSTEM (Web Audio API) ---
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playClickSound() {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.1);
+}
+
+// Bind audio to all interactive elements
+document.addEventListener('click', (e) => {
+    if (e.target.closest('.interactive') || e.target.closest('button') || e.target.closest('a')) {
+        playClickSound();
+    }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof DASHBOARD_DATA === 'undefined') {
@@ -9,210 +33,242 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const D = DASHBOARD_DATA;
 
-    // --- KPIs ---
-    document.getElementById('update-date').textContent = `Actualizado: ${D.updated}`;
-    document.getElementById('kpi-total-val').textContent = D.kpis.total_prospectos.toLocaleString();
-    document.getElementById('kpi-contactadas-val').textContent = D.kpis.contactadas.toLocaleString();
-    document.getElementById('kpi-no-val').textContent = D.kpis.no_contactadas.toLocaleString();
-    document.getElementById('kpi-reuniones-val').textContent = D.kpis.reuniones.toLocaleString();
-    document.getElementById('kpi-tasa-val').textContent = D.kpis.tasa_conversion + '%';
+    document.getElementById('update-date').textContent = `ACTUALIZADO: ${D.updated}`;
 
-    // --- Seguimientos ---
-    document.getElementById('seg-vencidos').textContent = D.seguimientos.vencidos;
-    document.getElementById('seg-hoy').textContent = D.seguimientos.hoy;
-    document.getElementById('seg-pendientes').textContent = D.seguimientos.pendientes;
+    // --- ANIMATED COUNTERS ---
+    const animateValue = (id, start, end, duration, formatStr = false) => {
+        const obj = document.getElementById(id);
+        if (!obj) return;
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            // easeOutQuart
+            const ease = 1 - Math.pow(1 - progress, 4);
+            let val = Math.floor(progress * (end - start) + start);
 
-    // --- Contactadas Detail ---
-    const contactadasCards = document.getElementById('contactadas-cards');
-    if (D.contactadas_detail.length === 0) {
-        contactadasCards.innerHTML = '<p class="empty-state">No hay contactos registrados aún.</p>';
-    } else {
-        contactadasCards.innerHTML = D.contactadas_detail.map(c => `
-      <div class="contact-card">
-        <div class="cc-empresa">${c.empresa || 'Sin empresa'}</div>
+            if (formatStr) {
+                val = val.toLocaleString();
+                if (id.includes('tasa')) val += '%';
+            } else {
+                val = val.toLocaleString();
+            }
+            obj.innerHTML = val;
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                const finalVal = end.toLocaleString();
+                obj.innerHTML = id.includes('tasa') ? finalVal + '%' : finalVal;
+            }
+        };
+        window.requestAnimationFrame(step);
+    };
+
+    animateValue('kpi-total-val', 0, D.kpis.total_prospectos, 1500, true);
+    animateValue('kpi-contactadas-val', 0, D.kpis.contactadas, 1500, true);
+    animateValue('kpi-no-val', 0, D.kpis.no_contactadas, 1500, true);
+    animateValue('kpi-reuniones-val', 0, D.kpis.reuniones, 1500, true);
+    animateValue('kpi-tasa-val', 0, D.kpis.tasa_conversion, 1500, true);
+
+    animateValue('seg-vencidos', 0, D.seguimientos.vencidos, 1000, true);
+    animateValue('seg-hoy', 0, D.seguimientos.hoy, 1000, true);
+    animateValue('seg-pendientes', 0, D.seguimientos.pendientes, 1000, true);
+
+    // --- BOSS COMMENTS & REACTIONS SYSTEM ---
+    function getContactMeta(contactId) {
+        const data = JSON.parse(localStorage.getItem('oc_interactions') || '{}');
+        return data[contactId] || { reaction: '', comment: '' };
+    }
+
+    window.saveContactMeta = function (contactId, key, value) {
+        const data = JSON.parse(localStorage.getItem('oc_interactions') || '{}');
+        if (!data[contactId]) data[contactId] = { reaction: '', comment: '' };
+        data[contactId][key] = value;
+        localStorage.setItem('oc_interactions', JSON.stringify(data));
+    }
+
+    window.setReaction = function (btn, contactId, reaction) {
+        const parent = btn.parentElement;
+        Array.from(parent.children).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        saveContactMeta(contactId, 'reaction', reaction);
+    }
+
+    const renderContactCard = (c) => {
+        // Generate simple ID based on name and company to store interaction
+        const cid = btoa(unescape(encodeURIComponent((c.nombre || '') + (c.empresa || '')))).substring(0, 20);
+        const meta = getContactMeta(cid);
+
+        return `
+      <div class="contact-card interactive">
+        <div class="cc-head">
+          <div class="cc-empresa">${c.empresa || 'Sin empresa'}</div>
+          <div class="cc-badge">${c.sub_estado || c.segmento}</div>
+        </div>
         <div class="cc-nombre">${c.nombre || 'Sin nombre'}</div>
-        <div class="cc-row">📧 ${c.correo || 'N/A'}</div>
-        ${c.linkedin ? `<div class="cc-row">🔗 <a href="${c.linkedin}" target="_blank">LinkedIn</a></div>` : ''}
-        <div class="cc-row">📞 ${c.medio || 'N/A'} · ${c.fecha || ''}</div>
-        <span class="cc-badge">${c.sub_estado || c.segmento}</span>
+        <div class="cc-meta">
+          <div>CORREO: <span>${c.correo || 'N/A'}</span></div>
+          ${c.linkedin ? `<div>LINKEDIN: <span><a href="${c.linkedin}" target="_blank" style="color:#fff;">Ver Perfil ↗</a></span></div>` : ''}
+          <div>CONTACTO: <span>${c.medio || 'N/A'} - ${c.fecha || 'N/A'}</span></div>
+          ${c.proximo ? `<div>PRÓXIMO: <span>${c.proximo}</span></div>` : ''}
+        </div>
+        
+        <div class="cc-reactions">
+          <div class="react-buttons">
+            <button class="btn-react interactive ${meta.reaction === '👍' ? 'active' : ''}" onclick="setReaction(this, '${cid}', '👍')">👍 APROBADO</button>
+            <button class="btn-react interactive ${meta.reaction === '⚠️' ? 'active' : ''}" onclick="setReaction(this, '${cid}', '⚠️')">⚠️ REVISAR</button>
+            <button class="btn-react interactive ${meta.reaction === '👀' ? 'active' : ''}" onclick="setReaction(this, '${cid}', '👀')">👀 VISTAZO</button>
+          </div>
+          <textarea class="boss-comment" placeholder="Dejar comentario para ejecutivo..." 
+                    onchange="saveContactMeta('${cid}', 'comment', this.value)">${meta.comment}</textarea>
+          <button class="save-comment-btn interactive">GUARDADO AUTOMÁTICO</button>
+        </div>
       </div>
-    `).join('');
-    }
+    `;
+    };
 
-    // --- Reuniones Detail ---
-    const reunionesCards = document.getElementById('reuniones-cards');
-    if (D.reuniones_detail.length === 0) {
-        reunionesCards.innerHTML = '<p class="empty-state">No hay reuniones agendadas aún.</p>';
-    } else {
-        reunionesCards.innerHTML = D.reuniones_detail.map(r => `
-      <div class="contact-card">
-        <div class="cc-empresa">${r.empresa || 'Sin empresa'}</div>
-        <div class="cc-nombre">${r.nombre || 'Sin nombre'}</div>
-        <div class="cc-row">📧 ${r.correo || 'N/A'}</div>
-        ${r.linkedin ? `<div class="cc-row">🔗 <a href="${r.linkedin}" target="_blank">LinkedIn</a></div>` : ''}
-        <div class="cc-row">📅 Contacto: ${r.fecha || 'N/A'}</div>
-        ${r.proximo ? `<div class="cc-row">⏰ Próximo: ${r.proximo}</div>` : ''}
-        <span class="cc-badge">${r.segmento}</span>
-      </div>
-    `).join('');
-    }
+    // --- DETAILS ---
+    const contactadasList = document.getElementById('contactadas-list');
+    contactadasList.innerHTML = D.contactadas_detail.length ?
+        D.contactadas_detail.map(renderContactCard).join('') :
+        '<p class="empty-state">No hay contactos recientes.</p>';
 
-    // --- Segment Table ---
+    const reunionesList = document.getElementById('reuniones-list');
+    reunionesList.innerHTML = D.reuniones_detail.length ?
+        D.reuniones_detail.map(renderContactCard).join('') :
+        '<p class="empty-state">No hay reuniones agendadas.</p>';
+
+    // --- TABLE ---
     const tbody = document.getElementById('segment-tbody');
     for (const [seg, vals] of Object.entries(D.segments)) {
-        tbody.innerHTML += `<tr><td><strong>${seg}</strong></td><td>${vals.total.toLocaleString()}</td><td>${vals.contactadas}</td><td>${vals.no_contactadas.toLocaleString()}</td></tr>`;
+        tbody.innerHTML += `<tr><td>${seg}</td><td>${vals.total.toLocaleString()}</td><td>${vals.contactadas}</td><td>${vals.no_contactadas.toLocaleString()}</td></tr>`;
     }
 
-    // --- Chart defaults ---
-    Chart.defaults.color = '#94a3b8';
-    Chart.defaults.borderColor = 'rgba(99, 120, 170, 0.15)';
+    // --- CHARTS (B&W Minimalist Theme) ---
+    Chart.defaults.color = '#888888';
+    Chart.defaults.borderColor = '#333333';
     Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.font.weight = 600;
 
-    // --- Chart: Estados ---
+    const chartOpts = {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { color: '#222' }, border: { dash: [4, 4] } },
+            x: { grid: { display: false } }
+        },
+        animation: { duration: 2000, easing: 'easeOutQuart' }
+    };
+
     new Chart(document.getElementById('chart-estados'), {
         type: 'bar',
         data: {
             labels: Object.keys(D.subestados),
             datasets: [{
-                label: 'Prospectos',
                 data: Object.values(D.subestados),
-                backgroundColor: ['#22c55e', '#ef4444', '#f97316', '#3b82f6', '#8b5cf6', '#64748b'],
-                borderRadius: 8,
-                borderSkipped: false,
+                backgroundColor: ['#FFFFFF', '#CCCCCC', '#999999', '#666666', '#444444', '#222222'],
+                borderWidth: 1,
+                borderColor: '#000'
             }]
         },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(99,120,170,0.1)' } },
-                x: { grid: { display: false } }
-            }
-        }
+        options: chartOpts
     });
 
-    // --- Chart: Canales (Pie) ---
     new Chart(document.getElementById('chart-canales'), {
         type: 'doughnut',
         data: {
             labels: Object.keys(D.canales),
             datasets: [{
                 data: Object.values(D.canales),
-                backgroundColor: ['#3b82f6', '#f97316', '#22c55e', '#8b5cf6'],
-                borderWidth: 0,
-                hoverOffset: 8,
+                backgroundColor: ['#FFFFFF', '#888888', '#444444', '#111111'],
+                borderWidth: 2, borderColor: '#000'
             }]
         },
         options: {
             responsive: true,
-            cutout: '60%',
-            plugins: {
-                legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyleWidth: 10 } }
-            }
+            cutout: '75%',
+            plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true, boxWidth: 8 } } },
+            animation: { duration: 2000, easing: 'easeOutQuart' }
         }
     });
 
-    // --- Chart: Pipeline ---
-    const pipeLabels = ['Total', 'Contactadas', 'En Seguimiento', 'Reuniones'];
-    const pipeValues = [D.pipeline.total, D.pipeline.contactadas, D.pipeline.en_seguimiento, D.pipeline.reuniones];
     new Chart(document.getElementById('chart-pipeline'), {
         type: 'bar',
         data: {
-            labels: pipeLabels,
+            labels: ['TOTAL', 'CONTACTADAS', 'SEGUIMIENTO', 'REUNIONES'],
             datasets: [{
-                label: 'Pipeline',
-                data: pipeValues,
-                backgroundColor: ['#1e293b', '#3b82f6', '#f97316', '#22c55e'],
-                borderRadius: 8,
-                borderSkipped: false,
+                data: [D.pipeline.total, D.pipeline.contactadas, D.pipeline.en_seguimiento, D.pipeline.reuniones],
+                backgroundColor: ['#222222', '#555555', '#AAAAAA', '#FFFFFF'],
+                borderWidth: 1, borderColor: '#000'
             }]
         },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: { beginAtZero: true, grid: { color: 'rgba(99,120,170,0.1)' } },
-                y: { grid: { display: false } }
-            }
-        }
+        options: { ...chartOpts, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { color: '#222' } }, y: { grid: { display: false } } } }
     });
 
-    // --- Chart: Conversión por Canal ---
     const convLabels = Object.keys(D.conversion_canal);
-    const convContactados = convLabels.map(c => D.conversion_canal[c].contactados);
-    const convReuniones = convLabels.map(c => D.conversion_canal[c].reuniones);
     new Chart(document.getElementById('chart-conversion'), {
         type: 'bar',
         data: {
             labels: convLabels,
             datasets: [
-                { label: 'Contactados', data: convContactados, backgroundColor: '#3b82f6', borderRadius: 6, borderSkipped: false },
-                { label: 'Reuniones', data: convReuniones, backgroundColor: '#22c55e', borderRadius: 6, borderSkipped: false },
+                { label: 'CONTACTADOS', data: convLabels.map(c => D.conversion_canal[c].contactados), backgroundColor: '#444' },
+                { label: 'REUNIONES', data: convLabels.map(c => D.conversion_canal[c].reuniones), backgroundColor: '#FFF' },
             ]
         },
         options: {
-            responsive: true,
-            plugins: { legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true } } },
-            scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(99,120,170,0.1)' } },
-                x: { grid: { display: false } }
-            }
+            ...chartOpts,
+            plugins: { legend: { display: true, position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } } }
         }
     });
 
-    // --- Reports ---
+    // --- REPORTS ---
     loadReports();
 });
 
-// --- TOGGLE DETAIL ---
-function toggleDetail(type) {
+// --- UI TOGGLERS ---
+window.toggleDetail = function (type) {
     const el = document.getElementById(`detail-${type}`);
     el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    if (el.style.display === 'block') {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
 }
 
 // --- REPORTS SYSTEM ---
-function getReports() {
-    return JSON.parse(localStorage.getItem('opencore_reports') || '[]');
-}
-
-function saveReports(reports) {
-    localStorage.setItem('opencore_reports', JSON.stringify(reports));
-}
+function getReports() { return JSON.parse(localStorage.getItem('oc_reports') || '[]'); }
+function saveReports(reports) { localStorage.setItem('oc_reports', JSON.stringify(reports)); }
 
 function loadReports() {
     const reports = getReports();
     const list = document.getElementById('reports-list');
     if (reports.length === 0) {
-        list.innerHTML = '<p class="empty-state">No hay reportes aún. Crea el primero.</p>';
+        list.innerHTML = '<div class="empty-state">No hay reportes.</div>';
         return;
     }
     list.innerHTML = reports.map((r, i) => `
-    <div class="report-item">
+    <div class="report-item interactive">
       <div class="ri-head">
         <div>
           <div class="ri-title">${r.title}</div>
           <div class="ri-date">${r.date}</div>
         </div>
-        <button class="ri-delete" onclick="deleteReport(${i})">🗑 Eliminar</button>
+        <button class="ri-delete interactive" onclick="deleteReport(${i})">ELIMINAR</button>
       </div>
-      <div class="ri-desc">${r.desc}</div>
-      ${r.img ? `<img class="ri-img" src="${r.img}" alt="Reporte">` : ''}
+      <div class="ri-desc">${r.desc.replace(/\n/g, '<br>')}</div>
+      ${r.img ? `<img class="ri-img" src="${r.img}" alt="Adjunto">` : ''}
     </div>
   `).join('');
 }
 
-function openReportModal() {
-    document.getElementById('modal-overlay').classList.add('active');
-}
-
-function closeReportModal() {
+window.openReportModal = () => document.getElementById('modal-overlay').classList.add('active');
+window.closeReportModal = () => {
     document.getElementById('modal-overlay').classList.remove('active');
     document.getElementById('report-form').reset();
     document.getElementById('img-preview').innerHTML = '';
-}
+};
 
-function saveReport(e) {
+window.saveReport = (e) => {
     e.preventDefault();
     const title = document.getElementById('report-title').value;
     const desc = document.getElementById('report-desc').value;
@@ -221,9 +277,7 @@ function saveReport(e) {
     const finalize = (imgData) => {
         const reports = getReports();
         reports.unshift({
-            title,
-            desc,
-            img: imgData || null,
+            title, desc, img: imgData,
             date: new Date().toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
         });
         saveReports(reports);
@@ -235,33 +289,23 @@ function saveReport(e) {
         const reader = new FileReader();
         reader.onload = (ev) => finalize(ev.target.result);
         reader.readAsDataURL(fileInput.files[0]);
-    } else {
-        finalize(null);
-    }
-}
+    } else finalize(null);
+};
 
-function deleteReport(index) {
-    if (confirm('¿Eliminar este reporte?')) {
+window.deleteReport = (index) => {
+    if (confirm('¿Eliminar reporte?')) {
         const reports = getReports();
         reports.splice(index, 1);
         saveReports(reports);
         loadReports();
     }
-}
+};
 
-// Image preview
-document.addEventListener('DOMContentLoaded', () => {
-    const fileInput = document.getElementById('report-img');
-    if (fileInput) {
-        fileInput.addEventListener('change', function () {
-            const preview = document.getElementById('img-preview');
-            if (this.files.length > 0) {
-                const reader = new FileReader();
-                reader.onload = (e) => { preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`; };
-                reader.readAsDataURL(this.files[0]);
-            } else {
-                preview.innerHTML = '';
-            }
-        });
-    }
+document.getElementById('report-img').addEventListener('change', function () {
+    const preview = document.getElementById('img-preview');
+    if (this.files.length > 0) {
+        const reader = new FileReader();
+        reader.onload = (e) => { preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`; };
+        reader.readAsDataURL(this.files[0]);
+    } else preview.innerHTML = '';
 });
