@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opencore Stats — Dashboard de Seguimiento</title>
+  <meta name="description" content="Dashboard de métricas CRM para OpenCORE. Seguimiento de prospectos, reuniones y canales de contacto.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">◆</div>
+        <div>
+          <h1>Opencore Stats</h1>
+          <p class="subtitle">Dashboard de Seguimiento de Leads</p>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="badge" id="update-date">Cargando...</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- KPI CARDS -->
+    <section class="kpi-grid" id="kpi-grid">
+      <div class="kpi-card" id="kpi-total">
+        <div class="kpi-label">Total Prospectos</div>
+        <div class="kpi-value" id="kpi-total-val">—</div>
+        <div class="kpi-sub">Base de datos completa</div>
+      </div>
+      <div class="kpi-card kpi-green clickable" id="kpi-contactadas" onclick="toggleDetail('contactadas')">
+        <div class="kpi-label">Contactadas</div>
+        <div class="kpi-value" id="kpi-contactadas-val">—</div>
+        <div class="kpi-sub">Click para ver detalle ▼</div>
+      </div>
+      <div class="kpi-card kpi-orange">
+        <div class="kpi-label">No Contactadas</div>
+        <div class="kpi-value" id="kpi-no-val">—</div>
+        <div class="kpi-sub">Pendientes de gestión</div>
+      </div>
+      <div class="kpi-card kpi-blue clickable" id="kpi-reuniones" onclick="toggleDetail('reuniones')">
+        <div class="kpi-label">Reuniones Agendadas</div>
+        <div class="kpi-value" id="kpi-reuniones-val">—</div>
+        <div class="kpi-sub">Click para ver detalle ▼</div>
+      </div>
+      <div class="kpi-card kpi-accent">
+        <div class="kpi-label">Tasa de Conversión</div>
+        <div class="kpi-value" id="kpi-tasa-val">—</div>
+        <div class="kpi-sub">Reuniones / Contactadas</div>
+      </div>
+    </section>
+
+    <!-- DETAIL PANELS (hidden by default) -->
+    <section class="detail-panel" id="detail-contactadas" style="display:none;">
+      <div class="detail-header">
+        <h3>📋 Últimos Contactos Realizados</h3>
+        <button class="close-btn" onclick="toggleDetail('contactadas')">✕</button>
+      </div>
+      <div class="detail-cards" id="contactadas-cards"></div>
+    </section>
+
+    <section class="detail-panel" id="detail-reuniones" style="display:none;">
+      <div class="detail-header">
+        <h3>📅 Reuniones Agendadas</h3>
+        <button class="close-btn" onclick="toggleDetail('reuniones')">✕</button>
+      </div>
+      <div class="detail-cards" id="reuniones-cards"></div>
+    </section>
+
+    <!-- SEGUIMIENTOS -->
+    <section class="seg-grid">
+      <div class="seg-card seg-warn">
+        <div class="seg-icon">⚠️</div>
+        <div class="seg-value" id="seg-vencidos">0</div>
+        <div class="seg-label">Vencidos</div>
+      </div>
+      <div class="seg-card seg-today">
+        <div class="seg-icon">📌</div>
+        <div class="seg-value" id="seg-hoy">0</div>
+        <div class="seg-label">Para Hoy</div>
+      </div>
+      <div class="seg-card seg-future">
+        <div class="seg-icon">📅</div>
+        <div class="seg-value" id="seg-pendientes">0</div>
+        <div class="seg-label">Pendientes</div>
+      </div>
+    </section>
+
+    <!-- CHARTS -->
+    <section class="charts-grid">
+      <div class="chart-card">
+        <h3>Estado de Gestión</h3>
+        <canvas id="chart-estados"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Canal de Contacto</h3>
+        <canvas id="chart-canales"></canvas>
+      </div>
+    </section>
+
+    <section class="charts-grid">
+      <div class="chart-card">
+        <h3>Pipeline (Embudo)</h3>
+        <canvas id="chart-pipeline"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>Conversión por Canal</h3>
+        <canvas id="chart-conversion"></canvas>
+      </div>
+    </section>
+
+    <!-- SEGMENT BREAKDOWN -->
+    <section class="table-card">
+      <h3>Resumen por Segmento</h3>
+      <div class="table-responsive">
+        <table id="segment-table">
+          <thead>
+            <tr><th>Segmento</th><th>Total</th><th>Contactadas</th><th>No Contactadas</th></tr>
+          </thead>
+          <tbody id="segment-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- REPORTES -->
+    <section class="reports-section" id="reports-section">
+      <div class="reports-header">
+        <h2>📝 Reportes</h2>
+        <button class="btn-primary" onclick="openReportModal()">+ Nuevo Reporte</button>
+      </div>
+      <div class="reports-list" id="reports-list">
+        <p class="empty-state">No hay reportes aún. Crea el primero.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- REPORT MODAL -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeReportModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Nuevo Reporte</h3>
+        <button class="close-btn" onclick="closeReportModal()">✕</button>
+      </div>
+      <form id="report-form" onsubmit="saveReport(event)">
+        <div class="form-group">
+          <label>Título</label>
+          <input type="text" id="report-title" placeholder="Ej: Ganamos 2 seguidores en LinkedIn" required>
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="report-desc" placeholder="Escribe tu reporte aquí..." rows="4" required></textarea>
+        </div>
+        <div class="form-group">
+          <label>Imagen (opcional)</label>
+          <input type="file" id="report-img" accept="image/*">
+          <div class="img-preview" id="img-preview"></div>
+        </div>
+        <button type="submit" class="btn-primary btn-full">Guardar Reporte</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <p>Opencore Stats v1.0 — Dashboard de Seguimiento de Leads</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
