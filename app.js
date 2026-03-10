@@ -312,60 +312,196 @@ function renderDashboard() {
     }
 
     // --- CHARTS ---
-    Chart.defaults.color = '#888888';
-    Chart.defaults.borderColor = '#222222';
-    Chart.defaults.font.family = "'Inter', sans-serif";
-    Chart.defaults.font.size = 11;
+    const ctxEstados = document.getElementById('chart-estados').getContext('2d');
+    const ctxCanales = document.getElementById('chart-canales').getContext('2d');
+    const ctxPipeline = document.getElementById('chart-pipeline').getContext('2d');
+    const ctxConversion = document.getElementById('chart-conversion').getContext('2d');
 
-    const chartOpts = {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false } } },
-        animation: { duration: 2000, easing: 'easeOutQuart' }
+    // Gradient Generators
+    const getGrad = (ctx, c1, c2) => {
+        const g = ctx.createLinearGradient(0, 0, 0, 350);
+        g.addColorStop(0, c1);
+        g.addColorStop(1, c2);
+        return g;
+    };
+    const getGradH = (ctx, c1, c2) => {
+        const g = ctx.createLinearGradient(0, 0, 400, 0);
+        g.addColorStop(0, c1);
+        g.addColorStop(1, c2);
+        return g;
     };
 
+    // Global Chart Settings for Premium Look
+    Chart.defaults.color = '#A0AEC0';
+    Chart.defaults.font.family = "'Space Grotesk', 'Inter', sans-serif";
+    Chart.defaults.font.size = 11;
+    Chart.defaults.font.weight = 500;
+
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: 'rgba(10, 10, 15, 0.95)',
+                titleColor: '#00E5FF',
+                titleFont: { size: 13, family: "'Space Grotesk', sans-serif", weight: 'bold' },
+                bodyColor: '#ffffff',
+                bodyFont: { size: 12, family: "'Inter', sans-serif" },
+                borderColor: 'rgba(0, 229, 255, 0.2)',
+                borderWidth: 1,
+                padding: 14,
+                cornerRadius: 8,
+                displayColors: true,
+                boxPadding: 6,
+                usePointStyle: true
+            }
+        },
+        interaction: { mode: 'index', intersect: false },
+        animation: { duration: 2500, easing: 'easeOutQuart' },
+        elements: {
+            bar: { borderRadius: 4, borderSkipped: false }
+        }
+    };
+
+    const commonScales = {
+        y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false },
+            border: { display: false }
+        },
+        x: {
+            grid: { display: false, drawBorder: false },
+            border: { display: false }
+        }
+    };
+
+    // 1. ESTADO DE GESTIÓN (Vertical Bar)
     if (window.cEstados) window.cEstados.destroy();
-    window.cEstados = new Chart(document.getElementById('chart-estados'), {
+    window.cEstados = new Chart(ctxEstados, {
         type: 'bar',
         data: {
             labels: Object.keys(D.subestados),
-            datasets: [{ data: Object.values(D.subestados), backgroundColor: ['#00E5FF', '#CCCCCC', '#999999', '#666666', '#444444', '#222222'] }]
+            datasets: [{
+                label: 'Gestiones',
+                data: Object.values(D.subestados),
+                backgroundColor: [
+                    getGrad(ctxEstados, '#00E5FF', 'rgba(0, 229, 255, 0.05)'),
+                    getGrad(ctxEstados, '#B200FF', 'rgba(178, 0, 255, 0.05)'),
+                    getGrad(ctxEstados, '#FF2A2A', 'rgba(255, 42, 42, 0.05)'),
+                    getGrad(ctxEstados, '#E5FF00', 'rgba(229, 255, 0, 0.05)'),
+                    getGrad(ctxEstados, '#00FFAA', 'rgba(0, 255, 170, 0.05)'),
+                    getGrad(ctxEstados, '#888888', 'rgba(136, 136, 136, 0.05)')
+                ],
+                borderColor: ['#00E5FF', '#B200FF', '#FF2A2A', '#E5FF00', '#00FFAA', '#888888'],
+                borderWidth: 1.5,
+                hoverBackgroundColor: ['#00E5FF', '#B200FF', '#FF2A2A', '#E5FF00', '#00FFAA', '#888888'],
+                barPercentage: 0.6
+            }]
         },
-        options: chartOpts
+        options: { ...commonOptions, scales: commonScales }
     });
 
+    // 2. CANAL DE CONTACTO (Doughnut)
     if (window.cCanales) window.cCanales.destroy();
-    window.cCanales = new Chart(document.getElementById('chart-canales'), {
+    window.cCanales = new Chart(ctxCanales, {
         type: 'doughnut',
         data: {
             labels: Object.keys(D.canales),
-            datasets: [{ data: Object.values(D.canales), backgroundColor: ['#00E5FF', '#B200FF', '#444444', '#111111', '#333', '#666'], borderWidth: 2, borderColor: '#0a0a0a' }]
+            datasets: [{
+                data: Object.values(D.canales),
+                backgroundColor: ['#00E5FF', '#B200FF', '#E5FF00', '#FF2A2A', '#00FFAA', '#444444'],
+                borderWidth: 0,
+                hoverOffset: 20,
+                spacing: 4
+            }]
         },
-        options: { responsive: true, cutout: '75%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } } } }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '82%',
+            layout: { padding: 10 },
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: { usePointStyle: true, pointStyle: 'circle', padding: 20, color: '#A0AEC0', font: { size: 11 } }
+                },
+                tooltip: commonOptions.plugins.tooltip
+            },
+            animation: { animateScale: true, animateRotate: true, duration: 3000, easing: 'easeOutExpo' }
+        }
     });
 
+    // 3. EMBUDO DE VENTAS (Horizontal Bar)
     if (window.cPipeline) window.cPipeline.destroy();
-    window.cPipeline = new Chart(document.getElementById('chart-pipeline'), {
+    window.cPipeline = new Chart(ctxPipeline, {
         type: 'bar',
         data: {
             labels: ['TOTAL', 'CONTACTADAS', 'SEGUIMIENTO', 'REUNIONES'],
-            datasets: [{ data: [D.pipeline.total, D.pipeline.contactadas, D.pipeline.en_seguimiento, D.pipeline.reuniones], backgroundColor: ['#222222', '#555555', '#AAAAAA', '#E5FF00'], borderWidth: 0 }]
+            datasets: [{
+                label: 'Oportunidades',
+                data: [D.pipeline.total, D.pipeline.contactadas, D.pipeline.en_seguimiento, D.pipeline.reuniones],
+                backgroundColor: [
+                    getGradH(ctxPipeline, '#444444', 'rgba(68, 68, 68, 0.05)'),
+                    getGradH(ctxPipeline, '#B200FF', 'rgba(178, 0, 255, 0.05)'),
+                    getGradH(ctxPipeline, '#00E5FF', 'rgba(0, 229, 255, 0.05)'),
+                    getGradH(ctxPipeline, '#E5FF00', 'rgba(229, 255, 0, 0.05)')
+                ],
+                borderColor: ['#666666', '#B200FF', '#00E5FF', '#E5FF00'],
+                borderWidth: 1.5,
+                hoverBackgroundColor: ['#666666', '#B200FF', '#00E5FF', '#E5FF00'],
+                barPercentage: 0.5
+            }]
         },
-        options: { ...chartOpts, indexAxis: 'y', scales: { x: { beginAtZero: true, grid: { color: '#222' } }, y: { grid: { display: false } } } }
+        options: {
+            ...commonOptions,
+            indexAxis: 'y',
+            scales: {
+                x: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.03)', drawBorder: false }, border: { display: false } },
+                y: { grid: { display: false, drawBorder: false }, border: { display: false } }
+            }
+        }
     });
 
+    // 4. TASA DE ÉXITO POR CANAL (Grouped Bar)
     const convLabels = Object.keys(D.conversion_canal);
     if (window.cConversion) window.cConversion.destroy();
-    window.cConversion = new Chart(document.getElementById('chart-conversion'), {
+    window.cConversion = new Chart(ctxConversion, {
         type: 'bar',
         data: {
             labels: convLabels,
             datasets: [
-                { label: 'CONTACTADOS', data: convLabels.map(c => D.conversion_canal[c].contactados), backgroundColor: '#444' },
-                { label: 'REUNIONES', data: convLabels.map(c => D.conversion_canal[c].reuniones), backgroundColor: '#00E5FF' },
+                {
+                    label: 'CONTACTADOS',
+                    data: convLabels.map(c => D.conversion_canal[c].contactados),
+                    backgroundColor: getGrad(ctxConversion, '#444444', 'rgba(68, 68, 68, 0.05)'),
+                    borderColor: '#666666',
+                    borderWidth: 1.5,
+                    barPercentage: 0.7
+                },
+                {
+                    label: 'REUNIONES',
+                    data: convLabels.map(c => D.conversion_canal[c].reuniones),
+                    backgroundColor: getGrad(ctxConversion, '#00E5FF', 'rgba(0, 229, 255, 0.05)'),
+                    borderColor: '#00E5FF',
+                    borderWidth: 1.5,
+                    barPercentage: 0.7
+                },
             ]
         },
-        options: { ...chartOpts, plugins: { legend: { display: true, position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } } } }
+        options: {
+            ...commonOptions,
+            plugins: {
+                ...commonOptions.plugins,
+                legend: {
+                    display: true,
+                    position: 'top',
+                    align: 'end',
+                    labels: { usePointStyle: true, pointStyle: 'circle', color: '#A0AEC0', padding: 20 }
+                }
+            },
+            scales: commonScales
+        }
     });
 
     loadReports();
