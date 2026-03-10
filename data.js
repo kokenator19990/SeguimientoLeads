@@ -47,7 +47,7 @@ const DASHBOARD_DATA = {
   "seguimientos": {},
   "contactadas_detail": [],
   "reuniones_detail": [],
-  "updated": "10/03/2026 17:11",
+  "updated": "10/03/2026 18:54",
   "conversion_canal": {
     "LinkedIn": {
       "contactados": 0,
