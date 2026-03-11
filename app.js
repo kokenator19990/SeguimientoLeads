@@ -298,12 +298,12 @@ function renderDashboard() {
     const contactadasList = document.getElementById('contactadas-list');
     contactadasList.innerHTML = D.contactadas_detail.length ?
         D.contactadas_detail.map(renderContactCard).join('') :
-        '<div class="empty-state">No hay contactos recientes.</div>';
+        '<div class="empty-state">La URL del nuevo Google Sheets subido contiene datos agregados (métricas generales). Los detalles de los contactos individuales no están disponibles.</div>';
 
     const reunionesList = document.getElementById('reuniones-list');
     reunionesList.innerHTML = D.reuniones_detail.length ?
         D.reuniones_detail.map(renderContactCard).join('') :
-        '<div class="empty-state">No hay reuniones agendadas.</div>';
+        '<div class="empty-state">La URL del nuevo Google Sheets subido contiene datos agregados. Los detalles de las reuniones no están disponibles.</div>';
 
     // --- TABLE ---
     const tbody = document.getElementById('segment-tbody');
