@@ -39,6 +39,7 @@ let D = {
     segments: {},
     subestados: { "Reunión agendada": 0, "No Reunión": 0, "No le interesó": 0, "Lo verá": 0, "Me llamará": 0, "Otro": 0 },
     canales: { "LinkedIn": 0, "Correo": 0, "Teléfono": 0, "WhatsApp": 0, "Referido": 0, "Contacto Directo": 0 },
+    canal_reuniones: { "LinkedIn": 0, "Correo": 0, "Teléfono": 0, "WhatsApp": 0, "Referido": 0, "Contacto Directo": 0 },
     conversion_canal: {},
     pipeline: { total: 0, contactadas: 0, en_seguimiento: 0, reuniones: 0 },
     indicadores_elite: { contactos: 0, reuniones: 0, cerrados: 0 },
@@ -134,7 +135,7 @@ async function fetchAndProcessData() {
                     seen_reuniones.add(id_key);
                     D.kpis.reuniones++;
 
-                    if (D.canales[medio] !== undefined) canal_reuniones[medio]++;
+                    if (D.canales[medio] !== undefined) { canal_reuniones[medio]++; D.canal_reuniones[medio]++; }
 
                     D.reuniones_detail.push({
                         empresa, nombre, correo, linkedin, fecha, proximo, segmento: sheetDef.label
@@ -345,18 +346,23 @@ function renderDashboard() {
 
       if (type === 'contactos') {
           titleEl.innerText = "CONTACTADOS POR TIER";
-          // T1 = Inteligencia Mercado (best), T2 = VIP Top, T3 = Base Completa
-          const tierMap = { 'Intelig. Mercado': 'T1', 'VIP Top': 'T2', 'Base Completa': 'T3' };
-          const tierColors = { 'T1': '#00E5FF', 'T2': '#B200FF', 'T3': '#E5FF00' };
+          // Explicit order: T1 = best prospects, T2 = mid, T3 = rest
+          const tierOrder = [
+              { tier: 'T1', seg: 'Intelig. Mercado', color: '#00E5FF' },
+              { tier: 'T2', seg: 'VIP Top', color: '#B200FF' },
+              { tier: 'T3', seg: 'Base Completa', color: '#E5FF00' }
+          ];
           const tierLabels = [];
           const tierTotal = [];
           const tierContacted = [];
-          for (const [seg, vals] of Object.entries(D.segments)) {
-              const tier = tierMap[seg] || seg;
-              tierLabels.push(tier + ' — ' + seg);
+          const tierBarColors = [];
+          tierOrder.forEach(t => {
+              const vals = D.segments[t.seg] || { total: 0, contactadas: 0 };
+              tierLabels.push(t.tier + ' — ' + t.seg);
               tierTotal.push(vals.total);
               tierContacted.push(vals.contactadas);
-          }
+              tierBarColors.push(t.color);
+          });
           option = {
             backgroundColor: 'transparent',
             tooltip: { trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: 'rgba(0,229,255,0.3)', width: 1 } }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(0, 229, 255, 0.3)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
@@ -366,7 +372,7 @@ function renderDashboard() {
             yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(0, 229, 255, 0.04)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
             series: [
                 { name: 'TOTAL', type: 'bar', barGap: '15%', barWidth: '30%',
-                  itemStyle: { borderRadius: [6, 6, 0, 0], color: function(params) { const t = ['#00E5FF', '#B200FF', '#E5FF00'][params.dataIndex] || '#444'; return new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: t }, { offset: 1, color: t + '15' }]); }, shadowBlur: 12 },
+                  itemStyle: { borderRadius: [6, 6, 0, 0], color: function(params) { const c = tierBarColors[params.dataIndex]; return new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: c }, { offset: 1, color: c + '15' }]); }, shadowBlur: 12 },
                   data: tierTotal },
                 { name: 'CONTACTADOS', type: 'bar', barWidth: '30%',
                   itemStyle: { borderRadius: [6, 6, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#00FFAA' }, { offset: 1, color: 'rgba(0,255,170,0.1)' }]), shadowColor: 'rgba(0,255,170,0.5)', shadowBlur: 15 },
@@ -399,10 +405,10 @@ function renderDashboard() {
           // Only show data if there are actual reuniones
           const hasReuniones = D.kpis.reuniones > 0;
           if (hasReuniones) {
-              // Build pie from reunion channels
+              // Build pie from REUNION-SPECIFIC channels (not general contacts)
               const pieColors = ['#00E5FF', '#B200FF', '#E5FF00', '#FF2A6D', '#00FFAA', '#FF6B00'];
-              const pieData = Object.keys(D.canales).filter(k => D.canales[k] > 0).map((k, i) => ({
-                  name: k, value: D.canales[k],
+              const pieData = Object.keys(D.canal_reuniones).filter(k => D.canal_reuniones[k] > 0).map((k, i) => ({
+                  name: k, value: D.canal_reuniones[k],
                   itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [{ offset: 0, color: pieColors[i % pieColors.length] }, { offset: 1, color: pieColors[i % pieColors.length] + '40' }]), shadowColor: pieColors[i % pieColors.length], shadowBlur: 15 }
               }));
               option = {
