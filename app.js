@@ -433,20 +433,7 @@ function renderDashboard() {
       window.currentExpandedChart.setOption(option);
     };
 
-    // --- BOTTOM GLOBAL CHART (ESTADO DE GESTIÓN) ---
-    const chartOptsEstados = {
-        backgroundColor: 'transparent',
-        tooltip: { trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: 'rgba(0,229,255,0.3)', width: 1 } }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(0, 229, 255, 0.3)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
-        grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
-        xAxis: { type: 'category', data: Object.keys(D.subestados), axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11, rotate: 15 } },
-        yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
-        series: [{ name: 'Gestiones', type: 'bar', barWidth: '40%', itemStyle: { borderRadius: [6, 6, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#00E5FF' }, { offset: 1, color: 'rgba(0, 229, 255, 0.05)' }]), shadowColor: 'rgba(0, 229, 255, 0.5)', shadowBlur: 15 }, data: Object.values(D.subestados) }]
-    };
-    if (window.cEstados) window.cEstados.dispose();
-    window.cEstados = echarts.init(document.getElementById('chart-estados'), 'dark');
-    window.cEstados.setOption(chartOptsEstados);
-
-    loadReports();
+    fetchOtrosReportes();
 }
 
 window.toggleDetail = function (type) {
@@ -455,85 +442,76 @@ window.toggleDetail = function (type) {
     if (el.style.display === 'block') el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
-// --- REPORTS SYSTEM ---
-function loadReports() {
-    const reports = JSON.parse(localStorage.getItem('oc_reports_neon') || '[]');
-    const list = document.getElementById('reports-list');
-    list.innerHTML = reports.length ? reports.map((r, i) => `
-    <div class="report-item interactive">
-      <div class="ri-head"><div><div class="ri-title">${r.title}</div><div class="ri-date">${r.date}</div></div>
-      <button class="ri-delete interactive" onclick="deleteReport(${i})">ELIMINAR</button></div>
-      <div class="ri-desc">${r.desc.replace(/\n/g, '<br>')}</div>
-      ${r.img ? `<img class="ri-img" src="${r.img}" alt="Adjunto">` : ''}
-    </div>`).join('') : '<div class="empty-state">No hay reportes.</div>';
+// --- FEEDBACK MODAL ---
+window.openFeedbackModal = () => {
+    document.getElementById('feedback-overlay').classList.add('active');
+    document.getElementById('feedback-text').focus();
+};
+window.closeFeedbackModal = () => {
+    document.getElementById('feedback-overlay').classList.remove('active');
+    document.getElementById('feedback-form').reset();
+};
+
+window.sendFeedback = (e) => {
+    e.preventDefault();
+    const text = document.getElementById('feedback-text').value;
+    const mailtoLink = `mailto:jorge@opencore.cl?subject=Comentarios%20sobre%20Dashboard%20OpenCORE&body=${encodeURIComponent(text)}`;
+    window.location.href = mailtoLink;
+    closeFeedbackModal();
+};
+
+// --- OTROS REPORTES (GOOGLE SHEETS) ---
+// Pon aquí el link CSV de la pestaña "Otros Reportes" que crees en el Google Sheets.
+// Debe tener columnas como: Fecha | Titulo | Descripcion
+const REPORTES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/PLACEHOLDER_URL/pub?output=csv";
+
+function fetchOtrosReportes() {
+    const box = document.getElementById('reportes-loading');
+    if (!box) return;
+
+    if (REPORTES_CSV_URL.includes("PLACEHOLDER")) {
+        document.getElementById('otros-reportes-box').innerHTML = `
+          <div class="empty-state" style="color:#A0AEC0; font-family:'Inter'; text-align:center; padding: 2rem;">
+            <h3 style="margin-bottom: 10px; color:#00E5FF; font-family:'Space Grotesk'; font-size:1.2rem;">¡Pestaña de Reportes Configurable!</h3>
+            <p>1. Crea una pestaña llamada "Otros Reportes" en el Excel de Seguimientos.</p>
+            <p>2. Dale columnas: <strong>Fecha</strong>, <strong>Titulo</strong>, <strong>Descripcion</strong>.</p>
+            <p>3. Publícala en la web como CSV y reemplaza la constante <code style="color:#CCFF00">REPORTES_CSV_URL</code> en app.js.</p>
+          </div>`;
+        return;
+    }
+
+    Papa.parse(REPORTES_CSV_URL, {
+        download: true,
+        header: true,
+        complete: function(results) {
+            const data = results.data.filter(r => r.Titulo || r.Descripcion);
+            const container = document.getElementById('otros-reportes-box');
+            if (data.length === 0) {
+                container.innerHTML = '<div class="empty-state">No hay reportes recientes registrados en el Excel.</div>';
+                return;
+            }
+            
+            let html = '<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">';
+            data.forEach(r => {
+                const date = r.Fecha || new Date().toLocaleDateString('es-CL');
+                const title = r.Titulo || 'Reporte';
+                const desc = (r.Descripcion || '').replace(/\n/g, '<br>');
+                html += `
+                <div class="kpi-card interactive" style="padding: 1.5rem; border-top: 2px solid #00E5FF; background: rgba(0, 229, 255, 0.02);">
+                  <div style="color:#00E5FF; font-family:'Space Grotesk'; font-size:1.1rem; font-weight:bold; margin-bottom: 5px;">${title}</div>
+                  <div style="font-size:0.75rem; color:#A0AEC0; margin-bottom: 12px; letter-spacing: 1px;">${date}</div>
+                  <div style="font-family:'Inter'; font-size:0.9rem; line-height:1.5; color:#E2E8F0;">${desc}</div>
+                </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        },
+        error: function(err) {
+            document.getElementById('otros-reportes-box').innerHTML = `<div class="empty-state" style="color:#FF2A6D;">Error al cargar reportes: ${err.message}</div>`;
+        }
+    });
 }
 
-window.openReportModal = () => document.getElementById('modal-overlay').classList.add('active');
-window.closeReportModal = () => {
-    document.getElementById('modal-overlay').classList.remove('active');
-    document.getElementById('report-form').reset();
-    document.getElementById('img-preview').innerHTML = '';
-};
-
-window.saveReport = (e) => {
-    e.preventDefault();
-    const title = document.getElementById('report-title').value;
-    const desc = document.getElementById('report-desc').value;
-    const fileInput = document.getElementById('report-img');
-
-    const finalize = (imgData) => {
-        const reports = JSON.parse(localStorage.getItem('oc_reports_neon') || '[]');
-        reports.unshift({
-            title, desc, img: imgData,
-            date: new Date().toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-        });
-        localStorage.setItem('oc_reports_neon', JSON.stringify(reports));
-        loadReports();
-        closeReportModal();
-    };
-
-    if (fileInput.files.length > 0) {
-        const reader = new FileReader();
-        reader.onload = (ev) => finalize(ev.target.result);
-        reader.readAsDataURL(fileInput.files[0]);
-    } else finalize(null);
-};
-
-window.deleteReport = (index) => {
-    if (confirm('¿Eliminar reporte?')) {
-        const reports = JSON.parse(localStorage.getItem('oc_reports_neon') || '[]');
-        reports.splice(index, 1);
-        localStorage.setItem('oc_reports_neon', JSON.stringify(reports));
-        loadReports();
-    }
-};
-
-document.getElementById('report-img').addEventListener('change', function () {
-    const preview = document.getElementById('img-preview');
-    if (this.files.length > 0) {
-        const reader = new FileReader();
-        reader.onload = (e) => { preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`; };
-        reader.readAsDataURL(this.files[0]);
-    } else preview.innerHTML = '';
-});
-
-// --- CHART TOGGLE HANDLER ---
-document.querySelectorAll('[data-chart-toggle]').forEach(box => {
-    box.addEventListener('click', () => {
-        box.classList.toggle('collapsed');
-        // After expanding, tell ECharts to recalculate size
-        setTimeout(() => {
-            if (window.cEstados) window.cEstados.resize();
-            if (window.cCanales) window.cCanales.resize();
-            if (window.cPipeline) window.cPipeline.resize();
-            if (window.cConversion) window.cConversion.resize();
-        }, 500);
-    });
-});
-
 window.addEventListener('resize', () => {
-    if (window.cEstados) window.cEstados.resize();
-    if (window.cCanales) window.cCanales.resize();
-    if (window.cPipeline) window.cPipeline.resize();
-    if (window.cConversion) window.cConversion.resize();
+    if (window.currentExpandedChart) window.currentExpandedChart.resize();
 });

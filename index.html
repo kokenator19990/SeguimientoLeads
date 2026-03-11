@@ -13,7 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=3.5">
+  <link rel="stylesheet" href="style.css?v=3.6">
 </head>
 
 <body>
@@ -28,7 +28,7 @@
         <span class="logo-text">OpenCORE <span class="logo-accent">Stats</span></span>
       </div>
       <div class="header-meta">
-        <a href="mailto:jorge@opencore.cl?subject=Comentarios%20sobre%20Dashboard%20OpenCORE" class="feedback-btn" title="Enviar feedback (máx 300 caracteres)">+ Agregar Comentarios</a>
+        <a href="#" class="feedback-btn" title="Enviar feedback (máx 300 caracteres)" onclick="openFeedbackModal(); return false;">+ Agregar Comentarios</a>
         <span class="badge" id="update-date">Cargando datos...</span>
       </div>
     </div>
@@ -127,66 +127,30 @@
       </div>
     </section>
 
-    <!-- LOWER ANALYTICS: only Estado de Gestion -->
+    <!-- OTROS REPORTES -->
     <div class="section-title" style="margin-top: 3rem;">
-      <h2>EFECTIVIDAD DE GESTIÓN</h2>
-      <span class="section-sub">Resultados de cada contacto realizado</span>
+      <h2>OTROS REPORTES</h2>
     </div>
-    <section class="single-chart-box">
-      <div id="chart-estados" style="width:100%; height:350px;"></div>
-    </section>
-
-    <!-- TABLE -->
-    <div class="section-title">
-      <h2>DESGLOSE ESTRATÉGICO</h2>
-    </div>
-    <section class="table-container interactive">
-      <table id="segment-table">
-        <thead>
-          <tr>
-            <th>Segmento</th>
-            <th>Total Base</th>
-            <th>Contactadas</th>
-            <th>Restantes</th>
-          </tr>
-        </thead>
-        <tbody id="segment-tbody"></tbody>
-      </table>
-    </section>
-
-    <!-- REPORTS -->
-    <div class="section-title">
-      <h2>TABLÓN DE ANUNCIOS</h2>
-      <button class="btn-primary interactive" onclick="openReportModal()">+ NUEVO REPORTE</button>
-    </div>
-    <section class="reports-list" id="reports-list">
-      <div class="empty-state">No hay reportes.</div>
+    <section class="otros-reportes-box" id="otros-reportes-box">
+      <!-- Los reportes se inyectaran aqui dinámicamente -->
+      <div class="empty-state" id="reportes-loading">Buscando reportes en la base de datos...</div>
     </section>
 
   </main>
 
-  <!-- MODAL -->
-  <div class="modal-overlay" id="modal-overlay" onclick="closeReportModal()">
+  <!-- FEEDBACK MODAL -->
+  <div class="modal-overlay" id="feedback-overlay" onclick="closeFeedbackModal()">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <h2>CREAR REPORTE</h2>
-        <button class="close-btn interactive" onclick="closeReportModal()">X</button>
+        <h2>DEJAR UN COMENTARIO</h2>
+        <button class="close-btn interactive" onclick="closeFeedbackModal()">X</button>
       </div>
-      <form id="report-form" onsubmit="saveReport(event)">
+      <form id="feedback-form" onsubmit="sendFeedback(event)">
         <div class="form-group">
-          <label>TÍTULO</label>
-          <input type="text" id="report-title" placeholder="Ej: Superamos 5% en Respuestas" required>
+          <label>COMENTARIO (MÁX 300 CARACTERES)</label>
+          <textarea id="feedback-text" rows="4" maxlength="300" placeholder="Ej: Muy bien, me gusta así..." required></textarea>
         </div>
-        <div class="form-group">
-          <label>DETALLE</label>
-          <textarea id="report-desc" rows="4" required></textarea>
-        </div>
-        <div class="form-group">
-          <label>ADJUNTO (OPCIONAL)</label>
-          <input type="file" id="report-img" accept="image/*">
-          <div class="img-preview" id="img-preview"></div>
-        </div>
-        <button type="submit" class="btn-primary btn-full interactive">COMPARTIR AL EQUIPO</button>
+        <button type="submit" class="btn-primary btn-full interactive">ENVIAR COMENTARIO A JORGE</button>
       </form>
     </div>
   </div>
@@ -198,7 +162,7 @@
   </footer>
 
   <!-- <script src="data.js"></script> Ya no se usa, ahora es dinámico -->
-  <script src="app.js?v=3.5"></script>
+  <script src="app.js?v=3.6"></script>
 </body>
 
 </html>
