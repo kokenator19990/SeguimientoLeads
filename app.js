@@ -442,23 +442,62 @@ window.toggleDetail = function (type) {
     if (el.style.display === 'block') el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
-// --- FEEDBACK MODAL ---
+// --- FEEDBACK MODAL (FORMSPREE) ---
+// ⚠️ Reemplaza "TU_ID_DE_FORMSPREE" con el ID real que te da formspree.io, ej: "xyzyyqwq"
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/TU_ID_DE_FORMSPREE";
+
 window.openFeedbackModal = () => {
     document.getElementById('feedback-overlay').classList.add('active');
     document.getElementById('feedback-text').focus();
+    document.getElementById('feedback-status').style.display = 'none';
+    document.getElementById('feedback-submit-btn').style.display = 'block';
 };
 window.closeFeedbackModal = () => {
     document.getElementById('feedback-overlay').classList.remove('active');
     document.getElementById('feedback-form').reset();
 };
 
-window.sendFeedback = (e) => {
+document.getElementById('feedback-form').addEventListener('submit', function(e) {
     e.preventDefault();
+    const btn = document.getElementById('feedback-submit-btn');
+    const statusDiv = document.getElementById('feedback-status');
     const text = document.getElementById('feedback-text').value;
-    const mailtoLink = `mailto:jorge@opencore.cl?subject=Comentarios%20sobre%20Dashboard%20OpenCORE&body=${encodeURIComponent(text)}`;
-    window.location.href = mailtoLink;
-    closeFeedbackModal();
-};
+
+    btn.innerText = "ENVIANDO...";
+    btn.disabled = true;
+
+    fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            _replyto: 'jorge@opencore.cl',
+            message: text
+        })
+    }).then(response => {
+        if (response.ok) {
+            btn.style.display = 'none';
+            statusDiv.style.display = 'block';
+            statusDiv.innerText = "¡Comentario enviado con éxito de forma invisible!";
+            setTimeout(closeFeedbackModal, 2500);
+        } else {
+            // Si el ID de formspree no es válido, dará error de red o 404
+            btn.innerText = "ENVIAR COMENTARIO";
+            btn.disabled = false;
+            statusDiv.style.display = 'block';
+            statusDiv.style.color = '#FF2A6D';
+            statusDiv.innerText = "Error. Verifica que pusiste un ID de Formspree válido en app.js.";
+        }
+    }).catch(error => {
+        btn.innerText = "ENVIAR COMENTARIO";
+        btn.disabled = false;
+        statusDiv.style.display = 'block';
+        statusDiv.style.color = '#FF2A6D';
+        statusDiv.innerText = "Error de conexión con Formspree.";
+    });
+});
 
 // --- OTROS REPORTES (GOOGLE SHEETS) ---
 // Pon aquí el link CSV de la pestaña "Otros Reportes" que crees en el Google Sheets.

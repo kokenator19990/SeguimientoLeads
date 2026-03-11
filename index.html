@@ -13,7 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=3.6">
+  <link rel="stylesheet" href="style.css?v=3.7">
 </head>
 
 <body>
@@ -145,12 +145,13 @@
         <h2>DEJAR UN COMENTARIO</h2>
         <button class="close-btn interactive" onclick="closeFeedbackModal()">X</button>
       </div>
-      <form id="feedback-form" onsubmit="sendFeedback(event)">
+      <form id="feedback-form">
         <div class="form-group">
           <label>COMENTARIO (MÁX 300 CARACTERES)</label>
-          <textarea id="feedback-text" rows="4" maxlength="300" placeholder="Ej: Muy bien, me gusta así..." required></textarea>
+          <textarea id="feedback-text" name="message" rows="4" maxlength="300" placeholder="Ej: Muy bien, me gusta así..." required></textarea>
         </div>
-        <button type="submit" class="btn-primary btn-full interactive">ENVIAR COMENTARIO A JORGE</button>
+        <button type="submit" id="feedback-submit-btn" class="btn-primary btn-full interactive">ENVIAR COMENTARIO</button>
+        <div id="feedback-status" style="display: none; text-align: center; margin-top: 15px; font-family: 'Inter'; font-size: 0.85rem; color: #00FFAA;">¡Comentario enviado con éxito!</div>
       </form>
     </div>
   </div>
@@ -162,7 +163,7 @@
   </footer>
 
   <!-- <script src="data.js"></script> Ya no se usa, ahora es dinámico -->
-  <script src="app.js?v=3.6"></script>
+  <script src="app.js?v=3.7"></script>
 </body>
 
 </html>
