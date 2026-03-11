@@ -307,9 +307,11 @@ function renderDashboard() {
 
     // --- TABLE ---
     const tbody = document.getElementById('segment-tbody');
-    tbody.innerHTML = '';
-    for (const [seg, vals] of Object.entries(D.segments)) {
-        tbody.innerHTML += `<tr><td>${seg}</td><td>${vals.total.toLocaleString()}</td><td>${vals.contactadas}</td><td>${vals.no_contactadas.toLocaleString()}</td></tr>`;
+    if (tbody) {
+        tbody.innerHTML = '';
+        for (const [seg, vals] of Object.entries(D.segments)) {
+            tbody.innerHTML += `<tr><td>${seg}</td><td>${vals.total.toLocaleString()}</td><td>${vals.contactadas}</td><td>${vals.no_contactadas.toLocaleString()}</td></tr>`;
+        }
     }
 
     // --- ANALYTICS NAV HUB ---
@@ -463,7 +465,9 @@ window.closeFeedbackModal = () => {
     document.getElementById('feedback-form').reset();
 };
 
-document.getElementById('feedback-form').addEventListener('submit', function(e) {
+const feedbackFormEl = document.getElementById('feedback-form');
+if (feedbackFormEl) {
+feedbackFormEl.addEventListener('submit', function(e) {
     e.preventDefault();
     const btn = document.getElementById('feedback-submit-btn');
     const statusDiv = document.getElementById('feedback-status');
@@ -506,6 +510,7 @@ document.getElementById('feedback-form').addEventListener('submit', function(e) 
         statusDiv.innerText = "Error de conexión. Intenta de nuevo.";
     });
 });
+}
 
 // --- OTROS REPORTES (GOOGLE SHEETS) ---
 // Pon aquí el link CSV de la pestaña "Otros Reportes" que crees en el Google Sheets.
