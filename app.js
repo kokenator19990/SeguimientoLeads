@@ -152,11 +152,14 @@ async function fetchAndProcessData() {
                     reuniones: re,
                     tasa: ct > 0 ? (re / ct * 100).toFixed(1) : 0
                 };
+                
+                // Keep parallel arrays updated for legacy chart functions
+                canal_contactados[c] = ct;
+                canal_reuniones[c] = re;
             }
         });
 
-        // Proyectos Cerrados (not in CSV explicitly, assume 0 for now as they are metrics)
-        // You could theoretically add a Row in the sheet for "Proyectos Cerrados" to parse it here
+        // Proyectos Cerrados (not in CSV explicitly)
         proyectos_cerrados = 0; 
 
         D.pipeline.total = D.kpis.total_prospectos;
