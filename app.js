@@ -442,15 +442,21 @@ window.toggleDetail = function (type) {
     if (el.style.display === 'block') el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 };
 
-// --- FEEDBACK MODAL (FORMSPREE) ---
-// ⚠️ Reemplaza "TU_ID_DE_FORMSPREE" con el ID real que te da formspree.io, ej: "xyzyyqwq"
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/TU_ID_DE_FORMSPREE";
+// --- FEEDBACK MODAL (FORMSUBMIT.CO — NO REQUIERE CUENTA) ---
+// Los comentarios llegan directo a jorge@opencore.cl
+// La primera vez, Jorge recibirá un email de confirmación de FormSubmit (solo 1 vez).
+const FORMSUBMIT_URL = "https://formsubmit.co/ajax/jorge@opencore.cl";
 
 window.openFeedbackModal = () => {
     document.getElementById('feedback-overlay').classList.add('active');
     document.getElementById('feedback-text').focus();
-    document.getElementById('feedback-status').style.display = 'none';
-    document.getElementById('feedback-submit-btn').style.display = 'block';
+    const statusDiv = document.getElementById('feedback-status');
+    statusDiv.style.display = 'none';
+    statusDiv.style.color = '#00FFAA';
+    const btn = document.getElementById('feedback-submit-btn');
+    btn.style.display = 'block';
+    btn.innerText = 'ENVIAR COMENTARIO';
+    btn.disabled = false;
 };
 window.closeFeedbackModal = () => {
     document.getElementById('feedback-overlay').classList.remove('active');
@@ -466,36 +472,38 @@ document.getElementById('feedback-form').addEventListener('submit', function(e) 
     btn.innerText = "ENVIANDO...";
     btn.disabled = true;
 
-    fetch(FORMSPREE_ENDPOINT, {
+    fetch(FORMSUBMIT_URL, {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            _replyto: 'jorge@opencore.cl',
-            message: text
+            _subject: "Comentario Dashboard OpenCORE",
+            message: text,
+            _captcha: "false",
+            _template: "box"
         })
-    }).then(response => {
-        if (response.ok) {
+    }).then(response => response.json()).then(data => {
+        if (data.success === "true" || data.success === true) {
             btn.style.display = 'none';
             statusDiv.style.display = 'block';
-            statusDiv.innerText = "¡Comentario enviado con éxito de forma invisible!";
+            statusDiv.style.color = '#00FFAA';
+            statusDiv.innerText = "¡Comentario enviado con éxito!";
             setTimeout(closeFeedbackModal, 2500);
         } else {
-            // Si el ID de formspree no es válido, dará error de red o 404
             btn.innerText = "ENVIAR COMENTARIO";
             btn.disabled = false;
             statusDiv.style.display = 'block';
             statusDiv.style.color = '#FF2A6D';
-            statusDiv.innerText = "Error. Verifica que pusiste un ID de Formspree válido en app.js.";
+            statusDiv.innerText = data.message || "Error al enviar. Intenta de nuevo.";
         }
     }).catch(error => {
         btn.innerText = "ENVIAR COMENTARIO";
         btn.disabled = false;
         statusDiv.style.display = 'block';
         statusDiv.style.color = '#FF2A6D';
-        statusDiv.innerText = "Error de conexión con Formspree.";
+        statusDiv.innerText = "Error de conexión. Intenta de nuevo.";
     });
 });
 
