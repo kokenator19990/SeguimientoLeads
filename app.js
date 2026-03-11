@@ -344,53 +344,86 @@ function renderDashboard() {
       let option = {};
 
       if (type === 'contactos') {
-          titleEl.innerText = "EMBUDO DE VENTAS & PIPELINE";
+          titleEl.innerText = "CONTACTADOS POR TIER";
+          // T1 = Inteligencia Mercado (best), T2 = VIP Top, T3 = Base Completa
+          const tierMap = { 'Intelig. Mercado': 'T1', 'VIP Top': 'T2', 'Base Completa': 'T3' };
+          const tierColors = { 'T1': '#00E5FF', 'T2': '#B200FF', 'T3': '#E5FF00' };
+          const tierLabels = [];
+          const tierTotal = [];
+          const tierContacted = [];
+          for (const [seg, vals] of Object.entries(D.segments)) {
+              const tier = tierMap[seg] || seg;
+              tierLabels.push(tier + ' — ' + seg);
+              tierTotal.push(vals.total);
+              tierContacted.push(vals.contactadas);
+          }
           option = {
             backgroundColor: 'transparent',
-            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(229, 255, 0, 0.2)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
-            grid: { left: '3%', right: '4%', bottom: '3%', top: '5%', containLabel: true },
-            xAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
-            yAxis: { type: 'category', data: ['TOTAL', 'CONTACTADAS', 'SEGUIMIENTO', 'REUNIONES'].reverse(), axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }, axisLabel: { color: '#fff', fontFamily: 'Space Grotesk', fontSize: 11, fontWeight: 'bold' } },
-            series: [{
-                name: 'Oportunidades', type: 'bar', barWidth: '40%',
-                data: [
-                    { value: D.pipeline.reuniones, itemStyle: { color: '#E5FF00', shadowColor: 'rgba(229, 255, 0, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
-                    { value: D.pipeline.en_seguimiento, itemStyle: { color: '#00E5FF', shadowColor: 'rgba(0, 229, 255, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
-                    { value: D.pipeline.contactadas, itemStyle: { color: '#B200FF', shadowColor: 'rgba(178, 0, 255, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
-                    { value: D.pipeline.total, itemStyle: { color: '#444444', shadowColor: 'rgba(68, 68, 68, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } }
-                ]
-            }]
+            tooltip: { trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: 'rgba(0,229,255,0.3)', width: 1 } }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(0, 229, 255, 0.3)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
+            legend: { top: '0%', right: '0%', textStyle: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }, icon: 'circle' },
+            grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+            xAxis: { type: 'category', data: tierLabels, axisLine: { lineStyle: { color: 'rgba(0, 229, 255, 0.2)' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(0, 229, 255, 0.04)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
+            series: [
+                { name: 'TOTAL', type: 'bar', barGap: '15%', barWidth: '30%',
+                  itemStyle: { borderRadius: [6, 6, 0, 0], color: function(params) { const t = ['#00E5FF', '#B200FF', '#E5FF00'][params.dataIndex] || '#444'; return new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: t }, { offset: 1, color: t + '15' }]); }, shadowBlur: 12 },
+                  data: tierTotal },
+                { name: 'CONTACTADOS', type: 'bar', barWidth: '30%',
+                  itemStyle: { borderRadius: [6, 6, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#00FFAA' }, { offset: 1, color: 'rgba(0,255,170,0.1)' }]), shadowColor: 'rgba(0,255,170,0.5)', shadowBlur: 15 },
+                  data: tierContacted }
+            ]
           };
       } 
       else if (type === 'canal') {
-          titleEl.innerText = "TASA DE ÉXITO POR CANAL";
-          const convLabels = Object.keys(D.conversion_canal);
+          titleEl.innerText = "CANAL DE ORIGEN";
+          const canalLabels = Object.keys(D.canales);
+          const canalValues = Object.values(D.canales);
+          const neonColors = ['#00E5FF', '#B200FF', '#E5FF00', '#FF2A6D', '#00FFAA', '#FF6B00'];
           option = {
             backgroundColor: 'transparent',
-            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(0, 229, 255, 0.2)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
-            legend: { top: '0%', right: '0%', textStyle: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }, icon: 'circle' },
-            grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
-            xAxis: { type: 'category', data: convLabels, axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11, rotate: 15 } },
-            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
-            series: [
-                { name: 'CONTACTADOS', type: 'bar', barGap: '10%', itemStyle: { borderRadius: [4, 4, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#444444' }, { offset: 1, color: 'rgba(68, 68, 68, 0.1)' }]) }, data: convLabels.map(c => D.conversion_canal[c].contactados) },
-                { name: 'REUNIONES', type: 'bar', itemStyle: { borderRadius: [4, 4, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#00E5FF' }, { offset: 1, color: 'rgba(0, 229, 255, 0.1)' }]), shadowColor: 'rgba(0, 229, 255, 0.5)', shadowBlur: 10 }, data: convLabels.map(c => D.conversion_canal[c].reuniones) }
-            ]
+            tooltip: { trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: 'rgba(0,229,255,0.3)', width: 1 } }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(0, 229, 255, 0.3)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
+            grid: { left: '3%', right: '4%', bottom: '8%', top: '5%', containLabel: true },
+            xAxis: { type: 'category', data: canalLabels, axisLine: { lineStyle: { color: 'rgba(0, 229, 255, 0.2)' } }, axisLabel: { color: '#00E5FF', fontFamily: 'Space Grotesk', fontSize: 11, fontWeight: 'bold' } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(0, 229, 255, 0.04)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
+            series: [{
+                name: 'Contactos', type: 'bar', barWidth: '45%',
+                itemStyle: { borderRadius: [8, 8, 0, 0], color: function(params) { const c = neonColors[params.dataIndex % neonColors.length]; return new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: c }, { offset: 0.7, color: c + '60' }, { offset: 1, color: c + '08' }]); }, shadowBlur: 20 },
+                emphasis: { itemStyle: { shadowBlur: 30, shadowColor: 'rgba(0, 229, 255, 0.8)' } },
+                data: canalValues,
+                label: { show: true, position: 'top', color: '#00E5FF', fontFamily: 'Space Grotesk', fontWeight: 'bold', fontSize: 13, formatter: '{c}' }
+            }]
           };
       }
       else if (type === 'reuniones') {
-          titleEl.innerText = "DESGLOSE DE CANALES (REUNIONES)";
-          const pieColors = ['#00E5FF', '#B200FF', '#E5FF00', '#FF2A2A', '#00FFAA', '#444444'];
-          const pieData = Object.keys(D.canales).map((k, i) => ({
-              name: k, value: D.canales[k],
-              itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [{ offset: 0, color: pieColors[i] }, { offset: 1, color: pieColors[i] + '40' }]), shadowColor: pieColors[i], shadowBlur: 10 }
-          }));
-          option = {
-            backgroundColor: 'transparent',
-            tooltip: { trigger: 'item', backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(178, 0, 255, 0.2)', textStyle: { color: '#fff', fontFamily: 'Inter' }, borderWidth: 1 },
-            legend: { bottom: '0%', left: 'center', textStyle: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }, itemGap: 20, icon: 'circle' },
-            series: [{ name: 'Canal', type: 'pie', radius: ['55%', '80%'], center: ['50%', '45%'], avoidLabelOverlap: false, itemStyle: { borderRadius: 10, borderColor: '#141414', borderWidth: 3 }, label: { show: false }, data: pieData }]
-          };
+          titleEl.innerText = "REUNIONES AGENDADAS";
+          // Only show data if there are actual reuniones
+          const hasReuniones = D.kpis.reuniones > 0;
+          if (hasReuniones) {
+              // Build pie from reunion channels
+              const pieColors = ['#00E5FF', '#B200FF', '#E5FF00', '#FF2A6D', '#00FFAA', '#FF6B00'];
+              const pieData = Object.keys(D.canales).filter(k => D.canales[k] > 0).map((k, i) => ({
+                  name: k, value: D.canales[k],
+                  itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [{ offset: 0, color: pieColors[i % pieColors.length] }, { offset: 1, color: pieColors[i % pieColors.length] + '40' }]), shadowColor: pieColors[i % pieColors.length], shadowBlur: 15 }
+              }));
+              option = {
+                backgroundColor: 'transparent',
+                tooltip: { trigger: 'item', backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(0, 229, 255, 0.3)', textStyle: { color: '#fff', fontFamily: 'Inter' }, borderWidth: 1 },
+                legend: { bottom: '0%', left: 'center', textStyle: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }, itemGap: 20, icon: 'circle' },
+                series: [{ name: 'Reuniones', type: 'pie', radius: ['55%', '80%'], center: ['50%', '45%'], avoidLabelOverlap: false, itemStyle: { borderRadius: 10, borderColor: '#141414', borderWidth: 3 }, label: { show: false }, data: pieData }]
+              };
+          } else {
+              // Empty state — elegant placeholder
+              option = {
+                backgroundColor: 'transparent',
+                title: { text: 'SIN REUNIONES AGENDADAS', subtext: 'Las reuniones aparecerán aquí cuando se registren en el CRM', left: 'center', top: 'center',
+                  textStyle: { color: '#A0AEC0', fontFamily: 'Space Grotesk', fontSize: 18, fontWeight: 'bold', letterSpacing: 2 },
+                  subtextStyle: { color: 'rgba(160,174,192,0.5)', fontFamily: 'Inter', fontSize: 13, lineHeight: 24 }
+                },
+                series: [{ name: 'Vacío', type: 'pie', radius: ['55%', '80%'], center: ['50%', '45%'], silent: true, itemStyle: { borderRadius: 10, borderColor: '#141414', borderWidth: 3 }, label: { show: false },
+                  data: [{ value: 1, name: 'Sin datos', itemStyle: { color: 'rgba(255,255,255,0.03)' } }]
+                }]
+              };
+          }
       }
 
       window.currentExpandedChart.setOption(option);
@@ -399,7 +432,7 @@ function renderDashboard() {
     // --- BOTTOM GLOBAL CHART (ESTADO DE GESTIÓN) ---
     const chartOptsEstados = {
         backgroundColor: 'transparent',
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(0, 229, 255, 0.2)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
+        tooltip: { trigger: 'axis', axisPointer: { type: 'line', lineStyle: { color: 'rgba(0,229,255,0.3)', width: 1 } }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(0, 229, 255, 0.3)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
         grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
         xAxis: { type: 'category', data: Object.keys(D.subestados), axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11, rotate: 15 } },
         yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
