@@ -371,11 +371,9 @@ function renderDashboard() {
             xAxis: { type: 'category', data: tierLabels, axisLine: { lineStyle: { color: 'rgba(0, 229, 255, 0.2)' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
             yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(0, 229, 255, 0.04)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
             series: [
-                { name: 'TOTAL', type: 'bar', barGap: '15%', barWidth: '30%',
-                  itemStyle: { borderRadius: [6, 6, 0, 0], color: function(params) { const c = tierBarColors[params.dataIndex]; return new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: c }, { offset: 1, color: c + '15' }]); }, shadowBlur: 12 },
-                  data: tierTotal },
-                { name: 'CONTACTADOS', type: 'bar', barWidth: '30%',
-                  itemStyle: { borderRadius: [6, 6, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#00FFAA' }, { offset: 1, color: 'rgba(0,255,170,0.1)' }]), shadowColor: 'rgba(0,255,170,0.5)', shadowBlur: 15 },
+                { name: 'CONTACTADOS', type: 'bar', barWidth: '40%',
+                  itemStyle: { borderRadius: [6, 6, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#00E5FF' }, { offset: 1, color: 'rgba(0,229,255,0.1)' }]), shadowColor: 'rgba(0,229,255,0.5)', shadowBlur: 15 },
+                  label: { show: true, position: 'top', color: '#00E5FF', fontFamily: 'Space Grotesk', fontWeight: 'bold', fontSize: 13, formatter: '{c}' },
                   data: tierContacted }
             ]
           };

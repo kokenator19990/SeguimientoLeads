@@ -176,6 +176,41 @@ h3 {
   height: 8px;
 }
 
+/* FEEDBACK BUTTON */
+.feedback-btn {
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--accent-cyan);
+  background: rgba(0, 229, 255, 0.05);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  padding: 6px 14px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+  margin-right: 15px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.feedback-btn:hover {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .feedback-btn {
+    font-size: 0.65rem;
+    padding: 4px 8px;
+    margin-right: 8px;
+  }
+}
+
 .badge {
   font-size: 0.7rem;
   font-family: var(--font-heading);
