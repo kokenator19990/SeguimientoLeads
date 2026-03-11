@@ -38,8 +38,7 @@
     <!-- KPI GRID -->
     <section class="kpi-grid" id="kpi-grid">
       <!-- NEW RING INDICATOR -->
-      <div class="kpi-card ring-card interactive" tabindex="0" data-tilt data-tilt-max="5" data-tilt-speed="400"
-        data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
+      <div class="kpi-card ring-card interactive" tabindex="0" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
         <div class="progress-ring" style="transform: translateZ(20px);">
           <svg viewBox="0 0 100 100">
             <circle class="bg" cx="50" cy="50" r="45"></circle>
@@ -50,32 +49,24 @@
         <div class="kpi-label" style="transform: translateZ(30px);">COBERTURA BASE</div>
       </div>
 
-      <div class="kpi-card interactive" tabindex="0" data-tilt data-tilt-max="5" data-tilt-speed="400"
-        data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
+      <div class="kpi-card interactive" tabindex="0" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
         <div class="kpi-label" style="transform: translateZ(20px);">TOTAL (ÚNICOS)</div>
         <div class="kpi-value fn-count" data-target="0" id="kpi-total-val" style="transform: translateZ(40px);">0</div>
         <div class="kpi-sub" style="transform: translateZ(20px);">Prospectos limpios</div>
       </div>
-      <div class="kpi-card interactive solid" tabindex="0" onclick="toggleDetail('contactadas')" data-tilt
-        data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1"
-        style="transform-style: preserve-3d;">
-        <div class="kpi-label" style="transform: translateZ(20px);">CONTACTADAS</div>
-        <div class="kpi-value fn-count" data-target="0" id="kpi-contactadas-val" style="transform: translateZ(40px);">0
-        </div>
-        <div class="kpi-sub accent-cyan" style="transform: translateZ(30px);">VER DETALLE ↗</div>
-      </div>
-      <div class="kpi-card interactive" tabindex="0" data-tilt data-tilt-max="5" data-tilt-speed="400"
-        data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
+      <div class="kpi-card interactive" tabindex="0" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
         <div class="kpi-label" style="transform: translateZ(20px);">NO CONTACTADAS</div>
         <div class="kpi-value fn-count" data-target="0" id="kpi-no-val" style="transform: translateZ(40px);">0</div>
         <div class="kpi-sub" style="transform: translateZ(20px);">Por Gestionar</div>
       </div>
-      <div class="kpi-card interactive solid" tabindex="0" onclick="toggleDetail('reuniones')" data-tilt
-        data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1"
-        style="transform-style: preserve-3d;">
+      <div class="kpi-card interactive solid" tabindex="0" onclick="toggleDetail('contactadas')" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
+        <div class="kpi-label" style="transform: translateZ(20px);">CONTACTADAS</div>
+        <div class="kpi-value fn-count" data-target="0" id="kpi-contactadas-val" style="transform: translateZ(40px);">0</div>
+        <div class="kpi-sub accent-cyan" style="transform: translateZ(30px);">VER DETALLE ↗</div>
+      </div>
+      <div class="kpi-card interactive solid" tabindex="0" onclick="toggleDetail('reuniones')" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.1" style="transform-style: preserve-3d;">
         <div class="kpi-label" style="transform: translateZ(20px);">REUNIONES</div>
-        <div class="kpi-value fn-count" data-target="0" id="kpi-reuniones-val" style="transform: translateZ(40px);">0
-        </div>
+        <div class="kpi-value fn-count" data-target="0" id="kpi-reuniones-val" style="transform: translateZ(40px);">0</div>
         <div class="kpi-sub accent-cyan" style="transform: translateZ(30px);">VER DETALLE ↗</div>
       </div>
     </section>
@@ -97,67 +88,51 @@
       <div class="detail-list" id="reuniones-list"></div>
     </section>
 
-    <!-- INDICADORES ELITE -->
+    <!-- ====== ANALYTICS HUB ====== -->
     <div class="section-title">
-      <h2>RENDIMIENTO COMERCIAL</h2>
+      <h2>ANALÍTICA COMERCIAL</h2>
     </div>
-    <section class="elite-grid">
-      <div class="elite-card interactive bg-accent-cyan" data-tilt data-tilt-max="4" data-tilt-speed="400"
-        data-tilt-glare="true" data-tilt-max-glare="0.2" style="transform-style: preserve-3d;">
-        <div class="elite-glow"></div>
-        <div class="elite-label" style="transform: translateZ(30px);">CONTACTOS REALIZADOS</div>
-        <div class="elite-value fn-count" data-target="0" id="elite-contactos" style="transform: translateZ(50px);">0
+
+    <!-- NAV BUTTONS: click to reveal charts -->
+    <section class="analytics-nav">
+      <button class="analytics-btn btn-contactos active" id="btn-contactos" onclick="showChart('contactos')">
+        <div class="abn-icon">📞</div>
+        <div class="abn-label">CONTACTOS</div>
+        <div class="abn-value fn-count" id="nav-contactadas">0</div>
+        <div class="abn-sub">Empresas contactadas</div>
+      </button>
+      <button class="analytics-btn btn-canal" id="btn-canal" onclick="showChart('canal')">
+        <div class="abn-icon">📡</div>
+        <div class="abn-label">CANAL DE ORIGEN</div>
+        <div class="abn-sub">¿Por dónde llegamos?</div>
+      </button>
+      <button class="analytics-btn btn-reuniones" id="btn-reuniones" onclick="showChart('reuniones')">
+        <div class="abn-icon">🤝</div>
+        <div class="abn-label">REUNIONES</div>
+        <div class="abn-value fn-count" id="nav-reuniones">0</div>
+        <div class="abn-sub">Cierres logrados</div>
+      </button>
+    </section>
+
+    <!-- CHART REVEAL PANEL (fan out effect) -->
+    <section class="chart-reveal-panel" id="chart-reveal-panel">
+      <div class="crp-inner" id="crp-inner">
+        <!-- Injected chart title -->
+        <div class="crp-header">
+          <span class="crp-title" id="crp-title">EMPRESAS CONTACTADAS</span>
+          <span class="crp-close" onclick="closeChart()">✕</span>
         </div>
-      </div>
-      <div class="elite-card interactive bg-accent-yellow" data-tilt data-tilt-max="4" data-tilt-speed="400"
-        data-tilt-glare="true" data-tilt-max-glare="0.2" style="transform-style: preserve-3d;">
-        <div class="elite-glow"></div>
-        <div class="elite-label" style="transform: translateZ(30px);">NUEVAS REUNIONES</div>
-        <div class="elite-value fn-count" data-target="0" id="elite-reuniones" style="transform: translateZ(50px);">0
-        </div>
-      </div>
-      <div class="elite-card interactive bg-accent-red" data-tilt data-tilt-max="4" data-tilt-speed="400"
-        data-tilt-glare="true" data-tilt-max-glare="0.2" style="transform-style: preserve-3d;">
-        <div class="elite-glow"></div>
-        <div class="elite-label" style="transform: translateZ(30px);">PROYECTOS CERRADOS</div>
-        <div class="elite-value fn-count" data-target="0" id="elite-cerrados" style="transform: translateZ(50px);">0
-        </div>
+        <div id="active-chart" style="width:100%; height:380px;"></div>
       </div>
     </section>
 
-    <!-- CHARTS -->
-    <div class="section-title">
-      <h2>ANALÍTICA DINÁMICA</h2>
+    <!-- LOWER ANALYTICS: only Estado de Gestion -->
+    <div class="section-title" style="margin-top: 3rem;">
+      <h2>EFECTIVIDAD DE GESTIÓN</h2>
+      <span class="section-sub">Resultados de cada contacto realizado</span>
     </div>
-    <section class="charts-grid">
-      <div class="chart-box interactive" data-chart-toggle data-tilt data-tilt-max="1.5" data-tilt-speed="400"
-        data-tilt-glare="true" data-tilt-max-glare="0.05" style="transform-style: preserve-3d;">
-        <h3 style="transform: translateZ(20px);">ESTADO DE GESTIÓN <span class="expand-hint">↕</span></h3>
-        <div class="chart-inner" style="transform: translateZ(10px);">
-          <div id="chart-estados" style="width: 100%; height: 100%; min-height: 350px;"></div>
-        </div>
-      </div>
-      <div class="chart-box interactive" data-chart-toggle data-tilt data-tilt-max="1.5" data-tilt-speed="400"
-        data-tilt-glare="true" data-tilt-max-glare="0.05" style="transform-style: preserve-3d;">
-        <h3 style="transform: translateZ(20px);">CANAL DE CONTACTO <span class="expand-hint">↕</span></h3>
-        <div class="chart-inner" style="transform: translateZ(10px);">
-          <div id="chart-canales" style="width: 100%; height: 100%; min-height: 350px;"></div>
-        </div>
-      </div>
-      <div class="chart-box interactive" data-chart-toggle data-tilt data-tilt-max="1.5" data-tilt-speed="400"
-        data-tilt-glare="true" data-tilt-max-glare="0.05" style="transform-style: preserve-3d;">
-        <h3 style="transform: translateZ(20px);">EMBUDO DE VENTAS <span class="expand-hint">↕</span></h3>
-        <div class="chart-inner" style="transform: translateZ(10px);">
-          <div id="chart-pipeline" style="width: 100%; height: 100%; min-height: 350px;"></div>
-        </div>
-      </div>
-      <div class="chart-box interactive" data-chart-toggle data-tilt data-tilt-max="1.5" data-tilt-speed="400"
-        data-tilt-glare="true" data-tilt-max-glare="0.05" style="transform-style: preserve-3d;">
-        <h3 style="transform: translateZ(20px);">TASA DE ÉXITO POR CANAL <span class="expand-hint">↕</span></h3>
-        <div class="chart-inner" style="transform: translateZ(10px);">
-          <div id="chart-conversion" style="width: 100%; height: 100%; min-height: 350px;"></div>
-        </div>
-      </div>
+    <section class="single-chart-box">
+      <div id="chart-estados" style="width:100%; height:350px;"></div>
     </section>
 
     <!-- TABLE -->
@@ -218,7 +193,7 @@
   <!-- FOOTER -->
   <footer class="footer">
     <div class="logo-mark small"></div>
-    <p>OPENCORE STATS V2.5 // ELITE DASHBOARD</p>
+    <p>OPENCORE STATS V3.0 // ELITE DASHBOARD</p>
   </footer>
 
   <!-- <script src="data.js"></script> Ya no se usa, ahora es dinámico -->

@@ -311,195 +311,103 @@ function renderDashboard() {
         tbody.innerHTML += `<tr><td>${seg}</td><td>${vals.total.toLocaleString()}</td><td>${vals.contactadas}</td><td>${vals.no_contactadas.toLocaleString()}</td></tr>`;
     }
 
-    // --- CHARTS (ECHARTS) ---
-    const chartOptsEstados = {
-        backgroundColor: 'transparent',
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'shadow' },
-            backgroundColor: 'rgba(10, 10, 15, 0.95)',
-            borderColor: 'rgba(0, 229, 255, 0.2)',
-            textStyle: { color: '#fff', fontFamily: 'Inter' }
-        },
-        grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
-        xAxis: {
-            type: 'category',
-            data: Object.keys(D.subestados),
-            axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } },
-            axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11, rotate: 15 }
-        },
-        yAxis: {
-            type: 'value',
-            splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } },
-            axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }
-        },
-        series: [{
-            name: 'Gestiones',
-            type: 'bar',
-            barWidth: '40%',
-            itemStyle: {
-                borderRadius: [6, 6, 0, 0],
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                    { offset: 0, color: '#00E5FF' },
-                    { offset: 1, color: 'rgba(0, 229, 255, 0.05)' }
-                ]),
-                shadowColor: 'rgba(0, 229, 255, 0.5)',
-                shadowBlur: 15
-            },
-            data: Object.values(D.subestados)
-        }]
+    // --- ANALYTICS NAV HUB ---
+    // Update button numbers
+    document.getElementById('nav-contactadas').innerText = D.kpis.contactadas;
+    document.getElementById('nav-reuniones').innerText = D.kpis.reuniones;
+
+    // --- CHART FACTORIES ---
+    window.currentExpandedChart = null;
+
+    window.closeChart = function() {
+      document.getElementById('chart-reveal-panel').classList.remove('active');
+      document.querySelectorAll('.analytics-btn').forEach(b => b.classList.remove('active'));
     };
 
+    window.showChart = function(type) {
+      // Manage button active states
+      document.querySelectorAll('.analytics-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-' + type).classList.add('active');
+
+      const panel = document.getElementById('chart-reveal-panel');
+      const titleEl = document.getElementById('crp-title');
+      const chartDom = document.getElementById('active-chart');
+      
+      // Open panel
+      panel.classList.add('active');
+
+      if (window.currentExpandedChart) {
+          window.currentExpandedChart.dispose();
+      }
+      window.currentExpandedChart = echarts.init(chartDom, 'dark');
+
+      let option = {};
+
+      if (type === 'contactos') {
+          titleEl.innerText = "EMBUDO DE VENTAS & PIPELINE";
+          option = {
+            backgroundColor: 'transparent',
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(229, 255, 0, 0.2)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
+            grid: { left: '3%', right: '4%', bottom: '3%', top: '5%', containLabel: true },
+            xAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
+            yAxis: { type: 'category', data: ['TOTAL', 'CONTACTADAS', 'SEGUIMIENTO', 'REUNIONES'].reverse(), axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }, axisLabel: { color: '#fff', fontFamily: 'Space Grotesk', fontSize: 11, fontWeight: 'bold' } },
+            series: [{
+                name: 'Oportunidades', type: 'bar', barWidth: '40%',
+                data: [
+                    { value: D.pipeline.reuniones, itemStyle: { color: '#E5FF00', shadowColor: 'rgba(229, 255, 0, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
+                    { value: D.pipeline.en_seguimiento, itemStyle: { color: '#00E5FF', shadowColor: 'rgba(0, 229, 255, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
+                    { value: D.pipeline.contactadas, itemStyle: { color: '#B200FF', shadowColor: 'rgba(178, 0, 255, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
+                    { value: D.pipeline.total, itemStyle: { color: '#444444', shadowColor: 'rgba(68, 68, 68, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } }
+                ]
+            }]
+          };
+      } 
+      else if (type === 'canal') {
+          titleEl.innerText = "TASA DE ÉXITO POR CANAL";
+          const convLabels = Object.keys(D.conversion_canal);
+          option = {
+            backgroundColor: 'transparent',
+            tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(0, 229, 255, 0.2)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
+            legend: { top: '0%', right: '0%', textStyle: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }, icon: 'circle' },
+            grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+            xAxis: { type: 'category', data: convLabels, axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11, rotate: 15 } },
+            yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
+            series: [
+                { name: 'CONTACTADOS', type: 'bar', barGap: '10%', itemStyle: { borderRadius: [4, 4, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#444444' }, { offset: 1, color: 'rgba(68, 68, 68, 0.1)' }]) }, data: convLabels.map(c => D.conversion_canal[c].contactados) },
+                { name: 'REUNIONES', type: 'bar', itemStyle: { borderRadius: [4, 4, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#00E5FF' }, { offset: 1, color: 'rgba(0, 229, 255, 0.1)' }]), shadowColor: 'rgba(0, 229, 255, 0.5)', shadowBlur: 10 }, data: convLabels.map(c => D.conversion_canal[c].reuniones) }
+            ]
+          };
+      }
+      else if (type === 'reuniones') {
+          titleEl.innerText = "DESGLOSE DE CANALES (REUNIONES)";
+          const pieColors = ['#00E5FF', '#B200FF', '#E5FF00', '#FF2A2A', '#00FFAA', '#444444'];
+          const pieData = Object.keys(D.canales).map((k, i) => ({
+              name: k, value: D.canales[k],
+              itemStyle: { color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [{ offset: 0, color: pieColors[i] }, { offset: 1, color: pieColors[i] + '40' }]), shadowColor: pieColors[i], shadowBlur: 10 }
+          }));
+          option = {
+            backgroundColor: 'transparent',
+            tooltip: { trigger: 'item', backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(178, 0, 255, 0.2)', textStyle: { color: '#fff', fontFamily: 'Inter' }, borderWidth: 1 },
+            legend: { bottom: '0%', left: 'center', textStyle: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }, itemGap: 20, icon: 'circle' },
+            series: [{ name: 'Canal', type: 'pie', radius: ['55%', '80%'], center: ['50%', '45%'], avoidLabelOverlap: false, itemStyle: { borderRadius: 10, borderColor: '#141414', borderWidth: 3 }, label: { show: false }, data: pieData }]
+          };
+      }
+
+      window.currentExpandedChart.setOption(option);
+    };
+
+    // --- BOTTOM GLOBAL CHART (ESTADO DE GESTIÓN) ---
+    const chartOptsEstados = {
+        backgroundColor: 'transparent',
+        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, backgroundColor: 'rgba(10, 10, 15, 0.95)', borderColor: 'rgba(0, 229, 255, 0.2)', textStyle: { color: '#fff', fontFamily: 'Inter' } },
+        grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
+        xAxis: { type: 'category', data: Object.keys(D.subestados), axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11, rotate: 15 } },
+        yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } }, axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 } },
+        series: [{ name: 'Gestiones', type: 'bar', barWidth: '40%', itemStyle: { borderRadius: [6, 6, 0, 0], color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: '#00E5FF' }, { offset: 1, color: 'rgba(0, 229, 255, 0.05)' }]), shadowColor: 'rgba(0, 229, 255, 0.5)', shadowBlur: 15 }, data: Object.values(D.subestados) }]
+    };
     if (window.cEstados) window.cEstados.dispose();
     window.cEstados = echarts.init(document.getElementById('chart-estados'), 'dark');
     window.cEstados.setOption(chartOptsEstados);
-
-    // 2. CANAL DE CONTACTO (Doughnut)
-    const pieColors = ['#00E5FF', '#B200FF', '#E5FF00', '#FF2A2A', '#00FFAA', '#444444'];
-    const pieData = Object.keys(D.canales).map((k, i) => ({
-        name: k, value: D.canales[k],
-        itemStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 1, 1, [
-                { offset: 0, color: pieColors[i] },
-                { offset: 1, color: pieColors[i] + '40' }
-            ]),
-            shadowColor: pieColors[i],
-            shadowBlur: 10
-        }
-    }));
-
-    if (window.cCanales) window.cCanales.dispose();
-    window.cCanales = echarts.init(document.getElementById('chart-canales'), 'dark');
-    window.cCanales.setOption({
-        backgroundColor: 'transparent',
-        tooltip: {
-            trigger: 'item',
-            backgroundColor: 'rgba(10, 10, 15, 0.95)',
-            borderColor: 'rgba(178, 0, 255, 0.2)',
-            textStyle: { color: '#fff', fontFamily: 'Inter' },
-            borderWidth: 1
-        },
-        legend: {
-            bottom: '0%',
-            left: 'center',
-            textStyle: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 },
-            itemGap: 20,
-            icon: 'circle'
-        },
-        series: [{
-            name: 'Canal',
-            type: 'pie',
-            radius: ['55%', '80%'],
-            center: ['50%', '45%'],
-            avoidLabelOverlap: false,
-            itemStyle: {
-                borderRadius: 10,
-                borderColor: '#141414',
-                borderWidth: 3
-            },
-            label: { show: false },
-            data: pieData
-        }]
-    });
-
-    // 3. EMBUDO DE VENTAS (Horizontal Bar)
-    if (window.cPipeline) window.cPipeline.dispose();
-    window.cPipeline = echarts.init(document.getElementById('chart-pipeline'), 'dark');
-    window.cPipeline.setOption({
-        backgroundColor: 'transparent',
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'shadow' },
-            backgroundColor: 'rgba(10, 10, 15, 0.95)',
-            borderColor: 'rgba(229, 255, 0, 0.2)',
-            textStyle: { color: '#fff', fontFamily: 'Inter' }
-        },
-        grid: { left: '3%', right: '4%', bottom: '3%', top: '5%', containLabel: true },
-        xAxis: {
-            type: 'value',
-            splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } },
-            axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }
-        },
-        yAxis: {
-            type: 'category',
-            data: ['TOTAL', 'CONTACTADAS', 'SEGUIMIENTO', 'REUNIONES'].reverse(),
-            axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } },
-            axisLabel: { color: '#fff', fontFamily: 'Space Grotesk', fontSize: 11, fontWeight: 'bold' }
-        },
-        series: [{
-            name: 'Oportunidades',
-            type: 'bar',
-            barWidth: '40%',
-            data: [
-                { value: D.pipeline.reuniones, itemStyle: { color: '#E5FF00', shadowColor: 'rgba(229, 255, 0, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
-                { value: D.pipeline.en_seguimiento, itemStyle: { color: '#00E5FF', shadowColor: 'rgba(0, 229, 255, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
-                { value: D.pipeline.contactadas, itemStyle: { color: '#B200FF', shadowColor: 'rgba(178, 0, 255, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } },
-                { value: D.pipeline.total, itemStyle: { color: '#444444', shadowColor: 'rgba(68, 68, 68, 0.5)', shadowBlur: 10, borderRadius: [0, 6, 6, 0] } }
-            ]
-        }]
-    });
-
-    // 4. TASA DE ÉXITO POR CANAL (Grouped Bar)
-    const convLabels = Object.keys(D.conversion_canal);
-    if (window.cConversion) window.cConversion.dispose();
-    window.cConversion = echarts.init(document.getElementById('chart-conversion'), 'dark');
-    window.cConversion.setOption({
-        backgroundColor: 'transparent',
-        tooltip: {
-            trigger: 'axis',
-            axisPointer: { type: 'shadow' },
-            backgroundColor: 'rgba(10, 10, 15, 0.95)',
-            borderColor: 'rgba(0, 229, 255, 0.2)',
-            textStyle: { color: '#fff', fontFamily: 'Inter' }
-        },
-        legend: {
-            top: '0%',
-            right: '0%',
-            textStyle: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 },
-            icon: 'circle'
-        },
-        grid: { left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true },
-        xAxis: {
-            type: 'category',
-            data: convLabels,
-            axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } },
-            axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11, rotate: 15 }
-        },
-        yAxis: {
-            type: 'value',
-            splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.03)', type: 'dashed' } },
-            axisLabel: { color: '#A0AEC0', fontFamily: 'Inter', fontSize: 11 }
-        },
-        series: [
-            {
-                name: 'CONTACTADOS',
-                type: 'bar',
-                barGap: '10%',
-                itemStyle: {
-                    borderRadius: [4, 4, 0, 0],
-                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: '#444444' },
-                        { offset: 1, color: 'rgba(68, 68, 68, 0.1)' }
-                    ])
-                },
-                data: convLabels.map(c => D.conversion_canal[c].contactados)
-            },
-            {
-                name: 'REUNIONES',
-                type: 'bar',
-                itemStyle: {
-                    borderRadius: [4, 4, 0, 0],
-                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                        { offset: 0, color: '#00E5FF' },
-                        { offset: 1, color: 'rgba(0, 229, 255, 0.1)' }
-                    ]),
-                    shadowColor: 'rgba(0, 229, 255, 0.5)',
-                    shadowBlur: 10
-                },
-                data: convLabels.map(c => D.conversion_canal[c].reuniones)
-            }
-        ]
-    });
 
     loadReports();
 }
