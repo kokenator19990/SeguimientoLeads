@@ -614,7 +614,7 @@ h3 {
   position: absolute;
   inset: -50%;
   border-radius: 50%;
-  opacity: 0.2;
+  opacity: 0.45; /* Increased opacity for permanent glow */
   transition: var(--transition);
   z-index: 1;
   pointer-events: none;
@@ -636,7 +636,7 @@ h3 {
 }
 
 .bg-accent-cyan:hover .elite-glow {
-  opacity: 0.45;
+  opacity: 0.65;
   animation-play-state: paused;
 }
 
@@ -655,7 +655,7 @@ h3 {
 }
 
 .bg-accent-yellow:hover .elite-glow {
-  opacity: 0.45;
+  opacity: 0.65;
   animation-play-state: paused;
 }
 
@@ -674,7 +674,7 @@ h3 {
 }
 
 .bg-accent-red:hover .elite-glow {
-  opacity: 0.45;
+  opacity: 0.65;
   animation-play-state: paused;
 }
 

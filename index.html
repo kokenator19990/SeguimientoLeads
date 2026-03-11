@@ -13,7 +13,7 @@
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <link rel="stylesheet" href="style.css?v=3.7">
+  <link rel="stylesheet" href="style.css?v=3.8">
 </head>
 
 <body>
@@ -25,10 +25,23 @@
   <header class="header">
     <div class="header-inner">
       <div class="logo">
-        <span class="logo-text">OpenCORE <span class="logo-accent">Stats</span></span>
+        <svg class="logo-svg" viewBox="0 0 460 120" width="180" height="45" xmlns="http://www.w3.org/2000/svg">
+          <!-- O -->
+          <circle cx="50" cy="60" r="35" fill="none" stroke="#fff" stroke-width="12" />
+          <circle cx="50" cy="60" r="15" fill="#00E5FF" />
+          <!-- P -->
+          <path d="M 120 25 L 120 95 M 120 25 L 160 25 A 20 20 0 0 1 180 45 A 20 20 0 0 1 160 65 L 120 65" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="square" />
+          <!-- E -->
+          <path d="M 240 25 L 205 25 M 205 25 L 205 95 L 240 95 M 205 60 L 230 60" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="square" />
+          <!-- N -->
+          <path d="M 270 95 L 270 25 L 315 95 L 315 25" fill="none" stroke="#fff" stroke-width="12" stroke-linejoin="miter" stroke-linecap="square" />
+          
+          <!-- C O R E -->
+          <text x="345" y="70" font-family="'Space Grotesk', sans-serif" font-weight="700" font-size="42" fill="#00E5FF" letter-spacing="2">CORE</text>
+        </svg>
       </div>
       <div class="header-meta">
-        <a href="#" class="feedback-btn" title="Enviar feedback (máx 300 caracteres)" onclick="openFeedbackModal(); return false;">+ Agregar Comentarios</a>
+        <a href="#muro-comentarios" class="feedback-btn" title="Ir al Muro de Comentarios" onclick="closeChart()">+ Dejar Comentario</a>
         <span class="badge" id="update-date">Cargando datos...</span>
       </div>
     </div>
@@ -127,34 +140,24 @@
       </div>
     </section>
 
-    <!-- OTROS REPORTES -->
-    <div class="section-title" style="margin-top: 3rem;">
-      <h2>OTROS REPORTES</h2>
+    <!-- MURO DE COMENTARIOS (LOCAL) -->
+    <div class="section-title" style="margin-top: 3rem;" id="muro-comentarios">
+      <h2>MURO DE COMENTARIOS</h2>
     </div>
-    <section class="otros-reportes-box" id="otros-reportes-box">
-      <!-- Los reportes se inyectaran aqui dinámicamente -->
-      <div class="empty-state" id="reportes-loading">Buscando reportes en la base de datos...</div>
+    
+    <section class="comment-board">
+      <form id="local-comment-form">
+        <div class="form-group">
+          <textarea id="local-comment-text" rows="3" maxlength="300" placeholder="Escribe tu comentario o actualización (máx 5 comentarios mostrados)..." required></textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="width: auto; padding: 10px 20px;">PUBLICAR</button>
+      </form>
+      <div id="comments-list" class="comments-list">
+        <!-- Comentarios inyectados aquí -->
+      </div>
     </section>
 
   </main>
-
-  <!-- FEEDBACK MODAL -->
-  <div class="modal-overlay" id="feedback-overlay" onclick="closeFeedbackModal()">
-    <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h2>DEJAR UN COMENTARIO</h2>
-        <button class="close-btn interactive" onclick="closeFeedbackModal()">X</button>
-      </div>
-      <form id="feedback-form">
-        <div class="form-group">
-          <label>COMENTARIO (MÁX 300 CARACTERES)</label>
-          <textarea id="feedback-text" name="message" rows="4" maxlength="300" placeholder="Ej: Muy bien, me gusta así..." required></textarea>
-        </div>
-        <button type="submit" id="feedback-submit-btn" class="btn-primary btn-full interactive">ENVIAR COMENTARIO</button>
-        <div id="feedback-status" style="display: none; text-align: center; margin-top: 15px; font-family: 'Inter'; font-size: 0.85rem; color: #00FFAA;">¡Comentario enviado con éxito!</div>
-      </form>
-    </div>
-  </div>
 
   <!-- FOOTER -->
   <footer class="footer">
@@ -163,7 +166,7 @@
   </footer>
 
   <!-- <script src="data.js"></script> Ya no se usa, ahora es dinámico -->
-  <script src="app.js?v=3.7"></script>
+  <script src="app.js?v=3.8"></script>
 </body>
 
 </html>

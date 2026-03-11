@@ -3,7 +3,7 @@
 // ========================================
 
 // Pub key del documento publicado en Google Sheets
-const PUB_KEY = '2PACX-1vR3QU-L6FxcRuM4okfwd3BS-1xBGJVHFbjlekbbdeeAbxuSG5Yrm7GlxT2PotYOW58K6mNiZMh3dm7K';
+const PUB_KEY = '2PACX-1vRIOuxSOCMCoJKJcCMPZwDhKp2UlBQcCjL_acVAlimbtttsbrR3XuZb1St1zy0C-A';
 const SHEETS_TO_LOAD = [
     { name: 'CUENTAS_VIP_TOP', gid: '1329255400', label: 'VIP Top' },
     { name: 'INTELIGENCIA_MERCADO', gid: '1464700851', label: 'Intelig. Mercado' },
@@ -68,99 +68,96 @@ SHEETS_TO_LOAD.forEach(s => {
 // --- FETCH FROM GOOGLE PUBLIC CSV ---
 async function fetchAndProcessData() {
     try {
-        let all_rows = [];
-
-        for (let sheetDef of SHEETS_TO_LOAD) {
-            // Requerimiento: El google sheets DEBE estar publicado en la web
-            const url = `https://docs.google.com/spreadsheets/d/e/${PUB_KEY}/pub?output=csv&gid=${sheetDef.gid}`;
-            const response = await fetch(url);
-            if (!response.ok) {
-                console.warn(`No se pudo cargar la pestaña ${sheetDef.name}. ¿Está publicado el documento en la web?`);
-                continue;
-            }
-            const csvText = await response.text();
-
-            // Parse with PapaParse
-            const result = Papa.parse(csvText, {
-                header: true,
-                skipEmptyLines: true,
-                transformHeader: h => h.trim()
-            });
-
-            // Iterate rows and aggregate
-            result.data.forEach((row, rowIndex) => {
-                let empresa = row["Empresa"];
-                if (!empresa || empresa.trim() === "") return; // Skip empty rows
-
-                let estado = row["Estado Contacto"];
-                let sub = row["Sub-Estado"];
-                let medio = row["Medio de Contacto"];
-                let nombre = row["Nombre Contacto"] || row["Nombre"] || row["Contacto"];
-                let correo = row["Email de Contacto"] || row["Email"] || row["Correo"];
-                let linkedin = row["LinkedIn"];
-                let fecha = row["Fecha Contacto"];
-                let proximo = row["Próximo Seguimiento"];
-
-                // ID Unico basado en fila y pestaña (igual que nuevo formato local)
-                let id_key = `${sheetDef.name}_${rowIndex}`;
-
-                D.kpis.total_prospectos++;
-                D.segments[sheetDef.label].total++;
-
-                let is_contactada = (estado === "Contactada");
-
-                if (is_contactada && !seen_contactadas.has(id_key)) {
-                    seen_contactadas.add(id_key);
-                    D.kpis.contactadas++;
-                    D.segments[sheetDef.label].contactadas++;
-
-                    D.contactadas_detail.push({
-                        empresa, nombre, correo, linkedin, medio, sub_estado: sub, fecha, segmento: sheetDef.label
-                    });
-
-                    if (D.subestados[sub] !== undefined) D.subestados[sub]++;
-                    if (sub === "Lo verá" || sub === "Me llamará") pipeline_seguimiento++;
-
-                    if (D.canales[medio] !== undefined) {
-                        D.canales[medio]++;
-                        canal_contactados[medio]++;
-                    }
-
-                    if (sub && (sub.toLowerCase().includes("cerrad") || sub.toLowerCase().includes("ganad") || sub.toLowerCase().includes("client"))) {
-                        proyectos_cerrados++;
-                    }
-                }
-
-                if (sub === "Reunión agendada" && !seen_reuniones.has(id_key)) {
-                    seen_reuniones.add(id_key);
-                    D.kpis.reuniones++;
-
-                    if (D.canales[medio] !== undefined) { canal_reuniones[medio]++; D.canal_reuniones[medio]++; }
-
-                    D.reuniones_detail.push({
-                        empresa, nombre, correo, linkedin, fecha, proximo, segmento: sheetDef.label
-                    });
-                }
-            });
-
-            // Calc no contactadas for segment
-            D.segments[sheetDef.label].no_contactadas = D.segments[sheetDef.label].total - D.segments[sheetDef.label].contactadas;
+        const url = `https://docs.google.com/spreadsheets/d/e/${PUB_KEY}/pub?output=csv`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            console.warn('No se pudo cargar el documento publicado en la web.');
+            throw new Error('No se pudo cargar el CSV');
         }
+        const csvText = await response.text();
 
-        // Post-processing math
-        D.kpis.no_contactadas = D.kpis.total_prospectos - D.kpis.contactadas;
-        D.kpis.tasa_conversion = D.kpis.contactadas > 0 ? (D.kpis.reuniones / D.kpis.contactadas * 100).toFixed(1) : 0;
+        const result = Papa.parse(csvText, {
+            header: false,
+            skipEmptyLines: false
+        });
+
+        const rows = result.data;
+        
+        const safeParseInt = (val) => {
+            if(!val) return 0;
+            const parsed = parseInt(val.toString().replace(/\\./g, '').trim(), 10);
+            return isNaN(parsed) ? 0 : parsed;
+        };
+
+        const safeParseFloatStr = (val) => {
+             if(!val) return "0.0";
+             return val.toString().replace(',', '.').replace('%', '').trim();
+        };
+
+        // Section 1: KPIs
+        D.kpis.total_prospectos = safeParseInt(rows[4][1]);
+        D.kpis.contactadas = safeParseInt(rows[4][2]);
+        D.kpis.no_contactadas = safeParseInt(rows[4][3]);
+        D.kpis.reuniones = safeParseInt(rows[4][4]);
+        
+        let rawTasa = safeParseFloatStr(rows[4][5]);
+        D.kpis.tasa_conversion = parseFloat(rawTasa);
         D.kpis.cobertura = D.kpis.total_prospectos > 0 ? (D.kpis.contactadas / D.kpis.total_prospectos * 100).toFixed(1) : 0;
 
+        // Section 2: Segments (Rows 7-9)
+        D.segments['VIP Top'] = {
+            total: safeParseInt(rows[7][2]),
+            contactadas: safeParseInt(rows[8][2]),
+            no_contactadas: safeParseInt(rows[9][2])
+        };
+        D.segments['Intelig. Mercado'] = {
+            total: safeParseInt(rows[7][3]),
+            contactadas: safeParseInt(rows[8][3]),
+            no_contactadas: safeParseInt(rows[9][3])
+        };
+        D.segments['Base Completa'] = {
+            total: safeParseInt(rows[7][4]),
+            contactadas: safeParseInt(rows[8][4]),
+            no_contactadas: safeParseInt(rows[9][4])
+        };
+
+        // Section 3: Subestados (Rows 12-17)
+        D.subestados['Reunión agendada'] = safeParseInt(rows[12][5]);
+        D.subestados['No Reunión'] = safeParseInt(rows[13][5]);
+        D.subestados['No le interesó'] = safeParseInt(rows[14][5]);
+        D.subestados['Lo verá'] = safeParseInt(rows[15][5]);
+        D.subestados['Me llamará'] = safeParseInt(rows[16][5]);
+        D.subestados['Otro'] = safeParseInt(rows[17][5]);
+
+        pipeline_seguimiento = D.subestados['Lo verá'] + D.subestados['Me llamará'];
+
+        // Section 4: Canal de Contacto (Rows 21-24)
+        D.canales['LinkedIn'] = safeParseInt(rows[21][5]);
+        D.canales['Correo'] = safeParseInt(rows[22][5]);
+        D.canales['Teléfono'] = safeParseInt(rows[23][5]);
+        D.canales['Contacto Directo'] = safeParseInt(rows[24][5]);
+
+        // Section 5: Conversiones por Canal (Rows 28-31)
+        D.canal_reuniones['LinkedIn'] = safeParseInt(rows[28][2]);
+        D.canal_reuniones['Correo'] = safeParseInt(rows[29][2]);
+        D.canal_reuniones['Teléfono'] = safeParseInt(rows[30][2]);
+        D.canal_reuniones['Contacto Directo'] = safeParseInt(rows[31][2]);
+
         canales_list.forEach(c => {
-            let ct = canal_contactados[c];
-            let re = canal_reuniones[c];
-            D.conversion_canal[c] = {
-                contactados: ct,
-                reuniones: re,
-                tasa: ct > 0 ? (re / ct * 100).toFixed(1) : 0
-            };
+            if(D.canales[c] !== undefined) {
+               let ct = D.canales[c];
+               let re = D.canal_reuniones[c] || 0;
+                D.conversion_canal[c] = {
+                    contactados: ct,
+                    reuniones: re,
+                    tasa: ct > 0 ? (re / ct * 100).toFixed(1) : 0
+                };
+            }
         });
+
+        // Proyectos Cerrados (not in CSV explicitly, assume 0 for now as they are metrics)
+        // You could theoretically add a Row in the sheet for "Proyectos Cerrados" to parse it here
+        proyectos_cerrados = 0; 
 
         D.pipeline.total = D.kpis.total_prospectos;
         D.pipeline.contactadas = D.kpis.contactadas;
@@ -174,9 +171,9 @@ async function fetchAndProcessData() {
         let now = new Date();
         D.updated = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')} (EN VIVO)`;
 
-        // Limit details
-        D.contactadas_detail = D.contactadas_detail.slice(0, 8);
-        D.reuniones_detail = D.reuniones_detail.slice(0, 8);
+        // Clear details since we don't have row data anymore
+        D.contactadas_detail = [];
+        D.reuniones_detail = [];
 
         // Render UI
         renderDashboard();
