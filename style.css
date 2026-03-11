@@ -737,6 +737,9 @@ h3 {
   position: relative;
   box-shadow: 0 0 50px rgba(0, 229, 255, 0.05) inset;
   animation: fanDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  overflow: visible; /* Allow tooltips to break out */
+  min-height: 480px; /* Force minimum height so chart fits */
+  border-radius: 8px;
 }
 
 .chart-reveal-panel.active {
@@ -746,6 +749,20 @@ h3 {
 @keyframes fanDown {
   from { opacity: 0; transform: scaleY(0.9) translateY(-20px); transform-origin: top; }
   to { opacity: 1; transform: scaleY(1) translateY(0); transform-origin: top; }
+}
+
+.crp-inner {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Force the active chart container to behave */
+#active-chart {
+  min-height: 380px !important;
+  width: 100% !important;
+  flex-grow: 1;
 }
 
 .crp-inner {
